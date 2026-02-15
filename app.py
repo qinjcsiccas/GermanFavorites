@@ -10,10 +10,14 @@ import pandas as pd
 
 app = Flask(__name__)
 
-# 预处理：移除所有空白、转小写、移除特殊字符，生成纯净ID
+# 影子索引函数：移除所有空白、转小写、移除特殊字符
 def slugify(text):
     if not text: return ""
+    # 彻底脱水：只保留字母和数字
     return re.sub(r'\W+', '', str(text)).lower()
+
+# 注册为 Jinja2 过滤器，解决报错的核心步骤
+app.jinja_env.filters['slugify'] = slugify
 
 def get_worksheet():
     creds_json = os.environ.get("GOOGLE_CREDS_JSON")
@@ -37,18 +41,17 @@ def index():
         df['备注'] = df['备注'].fillna('')
         df['标星'] = df['标星'].apply(lambda x: str(x).upper() in ['TRUE', '1', '是', 'YES'])
         
-        # 为前端生成一个“脱水ID”，用于安全传输和匹配
-        df['clean_id'] = df['名称'].apply(slugify)
-        
         q = request.args.get('q', '').strip()
         if q:
             df = df[df['名称'].str.contains(q, case=False)]
 
         starred = df[df['标星']].to_dict(orient='records')
+        
+        # 保持分类全量展示，置顶不消失
         categories = ["影音视听", "系统学习", "词典工具", "移动应用", "其他"]
         cat_data = {cat: df[df['类型'] == cat].to_dict(orient='records') for cat in categories if not df[df['类型'] == cat].empty}
         
-        return render_template('index.html', starred=starred, cat_data=cat_data, q=q)
+        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, categories=categories)
     except Exception as e:
         return f"Error: {str(e)}"
 
@@ -56,18 +59,13 @@ def index():
 def toggle(clean_id):
     sheet = get_worksheet()
     data = sheet.get_all_records()
-    
-    # 在后端遍历，通过影子索引匹配
     for i, row in enumerate(data):
-        row_name = str(row.get('名称', ''))
-        if slugify(row_name) == clean_id:
-            # 找到目标行，切换标星状态
+        # 后端同样使用 slugify 进行影子匹配，无视任何空格
+        if slugify(row.get('名称', '')) == clean_id:
             current = str(row.get('标星', '')).upper() in ['TRUE', '1', '是', 'YES']
             new_status = "TRUE" if not current else "FALSE"
-            # 锁定第 5 列 (E列) 更新
-            sheet.update_cell(i + 2, 5, new_status)
+            sheet.update_cell(i + 2, 5, new_status) # 假设标星在 E 列
             break
-            
     return redirect(url_for('index', q=request.args.get('q', ''), _t=time.time()))
 
 @app.route('/add', methods=['POST'])
