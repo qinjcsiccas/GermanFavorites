@@ -10,45 +10,44 @@
         .res-row { display: flex; align-items: center; justify-content: space-between; }
         summary::-webkit-details-marker { display: none; }
         
-        /* 提升空心星星的清晰度 */
+        /* 极致星星描边：使用多重阴影确保深色边框 */
         .star-empty {
-            color: #F3F4F6;
+            color: #ffffff;
             text-shadow: 
-                -1px -1px 0 #6B7280,  
-                 1px -1px 0 #6B7280,
-                -1px  1px 0 #6B7280,
-                 1px  1px 0 #6B7280;
+                1px 1px 0 #4B5563, -1px -1px 0 #4B5563, 
+                1px -1px 0 #4B5563, -1px 1px 0 #4B5563,
+                0px 1px 0 #4B5563, 0px -1px 0 #4B5563;
         }
     </style>
 </head>
-<body class="bg-gray-50 p-4 pb-12">
+<body class="bg-gray-50 p-4 pb-12 text-slate-900">
     <h1 class="text-2xl font-bold mb-4">🇩🇪 德语资源库</h1>
 
     <div class="flex items-center gap-2 mb-6 h-10">
         <button onclick="document.getElementById('addModal').style.display='flex'" 
-                class="h-full bg-white border border-gray-200 text-gray-500 px-4 rounded-lg text-sm font-medium shadow-sm active:bg-gray-100">
+                class="h-full bg-white border border-gray-300 text-gray-600 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-200">
             ➕ 新增
         </button>
         <form action="/" method="get" class="flex-1 h-full">
             <input type="text" name="q" value="{{ q }}" placeholder="🔍 快速搜索..." 
-                   class="w-full h-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none bg-white">
+                   class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none bg-white">
         </form>
-        <a href="/random" class="h-full aspect-square flex items-center justify-center bg-white border border-gray-200 rounded-lg text-lg">🎲</a>
+        <a href="/random" class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm">🎲</a>
     </div>
 
     {% if starred %}
     <div class="mb-6">
-        <h3 class="text-[10px] font-bold text-amber-500 mb-2 uppercase tracking-widest flex items-center gap-1">
-            <span class="w-1 h-3 bg-amber-500 rounded-full"></span> 核心置顶
+        <h3 class="text-[10px] font-bold text-amber-600 mb-2 uppercase tracking-widest flex items-center gap-1">
+            <span class="w-1 h-3 bg-amber-600 rounded-full"></span> 核心置顶
         </h3>
         <div class="space-y-2">
             {% for item in starred %}
-            <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
+            <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-200">
                 <a href="{{ item.网址 }}" class="flex-1 min-w-0 mr-4">
                     <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
-                    <div class="text-xs text-amber-600 no-wrap opacity-80">{{ item.备注 }}</div>
+                    <div class="text-xs text-amber-700 no-wrap opacity-90">{{ item.备注 }}</div>
                 </a>
-                <a href="/toggle/{{ item.名称 }}?q={{ q }}" class="text-3xl flex-shrink-0">⭐</a>
+                <a href="/toggle/{{ item.名称 }}?q={{ q }}" class="text-3xl flex-shrink-0 drop-shadow-sm">⭐</a>
             </div>
             {% endfor %}
         </div>
@@ -57,21 +56,21 @@
 
     <div class="space-y-4">
         {% for cat, items in cat_data.items() %}
-        <details class="group bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden" open>
-            <summary class="flex items-center justify-between p-4 font-bold text-gray-600 cursor-pointer list-none active:bg-gray-50">
+        <details class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" open>
+            <summary class="flex items-center justify-between p-4 font-bold text-gray-600 cursor-pointer list-none active:bg-gray-100">
                 <div class="flex items-center gap-2">
                     <span class="text-lg">📂</span>
                     <span class="text-sm uppercase tracking-wide">{{ cat }}</span>
-                    <span class="text-[10px] bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full ml-1">{{ items|length }}</span>
+                    <span class="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full ml-1">{{ items|length }}</span>
                 </div>
-                <span class="text-gray-300 transition-transform group-open:rotate-180">▼</span>
+                <span class="text-gray-400 transition-transform group-open:rotate-180">▼</span>
             </summary>
             <div class="px-4 pb-2 space-y-1">
                 {% for item in items %}
-                <div class="res-row py-3 border-b border-gray-50 last:border-0">
+                <div class="res-row py-3 border-b border-gray-100 last:border-0">
                     <a href="{{ item.网址 }}" class="flex-1 min-w-0 mr-4">
-                        <div class="font-semibold text-gray-700 no-wrap">{{ item.名称 }}</div>
-                        <div class="text-[11px] text-gray-400 no-wrap mt-0.5">{{ item.备注 }}</div>
+                        <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
+                        <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
                     </a>
                     <a href="/toggle/{{ item.名称 }}?q={{ q }}" class="text-3xl flex-shrink-0 {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
                         {{ '⭐' if item.标星 else '☆' }}
@@ -83,19 +82,19 @@
         {% endfor %}
     </div>
 
-    <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/40 backdrop-blur-sm items-center justify-center p-6 z-50">
+    <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
             <h3 class="text-lg font-bold mb-5 text-gray-800">添加新资源</h3>
             <form action="/add" method="post" class="space-y-4">
-                <input type="text" name="name" placeholder="资源名称" required class="w-full border border-gray-200 rounded-xl p-3 text-sm">
-                <input type="url" name="url" placeholder="网址" required class="w-full border border-gray-200 rounded-xl p-3 text-sm">
-                <select name="type" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-white">
+                <input type="text" name="name" placeholder="资源名称" required class="w-full border border-gray-300 rounded-xl p-3 text-sm">
+                <input type="url" name="url" placeholder="网址" required class="w-full border border-gray-300 rounded-xl p-3 text-sm">
+                <select name="type" class="w-full border border-gray-300 rounded-xl p-3 text-sm bg-white">
                     {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
                 </select>
-                <input type="text" name="note" placeholder="备注" class="w-full border border-gray-200 rounded-xl p-3 text-sm">
+                <input type="text" name="note" placeholder="备注" class="w-full border border-gray-300 rounded-xl p-3 text-sm">
                 <div class="flex gap-3 mt-2">
-                    <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="flex-1 bg-gray-50 text-gray-500 py-3 rounded-xl text-sm font-medium">取消</button>
-                    <button type="submit" class="flex-1 bg-blue-500 text-white py-3 rounded-xl text-sm font-bold shadow-lg">确认添加</button>
+                    <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-xl text-sm font-medium">取消</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-bold">确认添加</button>
                 </div>
             </form>
         </div>
