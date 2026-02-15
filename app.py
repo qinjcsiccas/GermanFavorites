@@ -157,3 +157,33 @@ def toggle(cid):
 def random_res():
     d = get_user_sheet(session['user']).get_all_records()
     return redirect(random.choice(d)['网址']) if d else redirect(url_for('index'))
+
+@app.route('/admin/reset', methods=['GET', 'POST'])
+def admin_reset():
+    # 简单安全校验：只有你自己的账号名（假设是 Jincheng）能进
+    if session.get('user') != 'Jincheng': 
+        return "权限不足", 403
+
+    if request.method == 'POST':
+        target_user = request.form.get('target_username').strip()
+        new_pw_raw = request.form.get('new_password')
+        
+        user_sheet = get_user_sheet("Users")
+        data = user_sheet.get_all_records()
+        
+        found = False
+        for i, row in enumerate(data):
+            if str(row.get('username')).strip() == target_user:
+                # 生成新哈希并直接覆盖 Google Sheet 对应行的密码列（B列）
+                new_hash = generate_password_hash(new_pw_raw)
+                user_sheet.update_cell(i + 2, 2, new_hash) 
+                found = True
+                break
+        
+        if found:
+            flash(f"用户 {target_user} 的密码已重置为 {new_pw_raw}")
+        else:
+            flash("未找到该用户")
+        return redirect(url_for('admin_reset'))
+
+    return render_template('admin_reset.html')
