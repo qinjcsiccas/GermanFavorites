@@ -54,7 +54,9 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password_raw = request.form.get('password')
-        if not username or not password_raw: return "请完整填写"
+        if not username or not password_raw:
+            flash("请完整填写用户名和密码")
+            return redirect(url_for('register'))
 
         try:
             gc = get_gc()
