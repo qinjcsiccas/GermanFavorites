@@ -10,14 +10,18 @@
         .res-row { display: flex; align-items: center; justify-content: space-between; }
         summary::-webkit-details-marker { display: none; }
         
-        /* 极致星星描边：使用多重阴影确保深色边框 */
+        /* 极致星星描边 */
         .star-empty {
             color: #ffffff;
-            text-shadow: 
-                1px 1px 0 #4B5563, -1px -1px 0 #4B5563, 
-                1px -1px 0 #4B5563, -1px 1px 0 #4B5563,
-                0px 1px 0 #4B5563, 0px -1px 0 #4B5563;
+            text-shadow: 1px 1px 0 #4B5563, -1px -1px 0 #4B5563, 1px -1px 0 #4B5563, -1px 1px 0 #4B5563;
         }
+
+        /* 点击后的加载动画 */
+        .loading-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* 点击触感动画 */
+        .star-click:active { transform: scale(1.4); transition: transform 0.1s; }
     </style>
 </head>
 <body class="bg-gray-50 p-4 pb-12 text-slate-900">
@@ -29,10 +33,10 @@
             ➕ 新增
         </button>
         <form action="/" method="get" class="flex-1 h-full">
-            <input type="text" name="q" value="{{ q }}" placeholder="🔍 快速搜索..." 
+            <input type="text" name="q" value="{{ q }}" placeholder="🔍 搜索名称..." 
                    class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none bg-white">
         </form>
-        <a href="/random" class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm">🎲</a>
+        <a href="/random" onclick="this.innerHTML='⏳'" class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm">🎲</a>
     </div>
 
     {% if starred %}
@@ -47,7 +51,7 @@
                     <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
                     <div class="text-xs text-amber-700 no-wrap opacity-90">{{ item.备注 }}</div>
                 </a>
-                <a href="/toggle/{{ item.名称 }}?q={{ q }}" class="text-3xl flex-shrink-0 drop-shadow-sm">⭐</a>
+                <a href="/toggle/{{ item.名称|slugify }}" onclick="showLoading(this)" class="star-click text-3xl flex-shrink-0">⭐</a>
             </div>
             {% endfor %}
         </div>
@@ -59,8 +63,7 @@
         <details class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" open>
             <summary class="flex items-center justify-between p-4 font-bold text-gray-600 cursor-pointer list-none active:bg-gray-100">
                 <div class="flex items-center gap-2">
-                    <span class="text-lg">📂</span>
-                    <span class="text-sm uppercase tracking-wide">{{ cat }}</span>
+                    <span class="text-lg">📂 {{ cat }}</span>
                     <span class="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full ml-1">{{ items|length }}</span>
                 </div>
                 <span class="text-gray-400 transition-transform group-open:rotate-180">▼</span>
@@ -72,7 +75,8 @@
                         <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
                         <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
                     </a>
-                    <a href="/toggle/{{ item.名称 }}?q={{ q }}" class="text-3xl flex-shrink-0 {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
+                    <a href="/toggle/{{ item.名称|slugify }}" onclick="showLoading(this)" 
+                       class="star-click text-3xl flex-shrink-0 {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
                         {{ '⭐' if item.标星 else '☆' }}
                     </a>
                 </div>
@@ -82,22 +86,12 @@
         {% endfor %}
     </div>
 
-    <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
-            <h3 class="text-lg font-bold mb-5 text-gray-800">添加新资源</h3>
-            <form action="/add" method="post" class="space-y-4">
-                <input type="text" name="name" placeholder="资源名称" required class="w-full border border-gray-300 rounded-xl p-3 text-sm">
-                <input type="url" name="url" placeholder="网址" required class="w-full border border-gray-300 rounded-xl p-3 text-sm">
-                <select name="type" class="w-full border border-gray-300 rounded-xl p-3 text-sm bg-white">
-                    {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
-                </select>
-                <input type="text" name="note" placeholder="备注" class="w-full border border-gray-300 rounded-xl p-3 text-sm">
-                <div class="flex gap-3 mt-2">
-                    <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-xl text-sm font-medium">取消</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-bold">确认添加</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <script>
+        // 点击星星后的加载动画
+        function showLoading(el) {
+            el.innerHTML = '<span class="inline-block loading-spin">⏳</span>';
+            el.style.pointerEvents = 'none'; // 防止重复点击
+        }
+    </script>
 </body>
 </html>
