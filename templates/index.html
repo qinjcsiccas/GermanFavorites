@@ -33,7 +33,13 @@
     </style>
 </head>
 <body class="bg-gray-50 p-4 pb-12 text-slate-900">
-    <h1 class="text-2xl font-bold mb-4">🇩🇪 德语资源库</h1>
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold">🇩🇪 德语资源库</h1>
+        <div class="flex items-center gap-3">
+            <span class="text-xs text-gray-400 font-medium">👤 {{ user }}</span>
+            <a href="/logout" class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-md hover:bg-red-100 hover:text-red-600 transition-colors">退出</a>
+        </div>
+    </div>
 
     <div class="flex items-center gap-2 mb-6 h-10">
         <button onclick="document.getElementById('addModal').style.display='flex'" 
