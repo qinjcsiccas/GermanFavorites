@@ -1,22 +1,41 @@
-<body class="bg-gray-100 p-6">
-    <div class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
-        <h2 class="text-xl font-bold mb-6 text-gray-800">🔐 管理员重置工具</h2>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员重置工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-6">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">🔐 管理员重置</h2>
         
         {% with messages = get_flashed_messages() %}
-          {% if messages %}<div class="mb-4 text-green-600 text-sm">{% for m in messages %}{{ m }}{% endfor %}</div>{% endif %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="mb-4 p-3 bg-blue-50 text-blue-700 text-xs rounded border border-blue-100 italic">
+                  i {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
         {% endwith %}
 
         <form action="/admin/reset" method="post" class="space-y-4">
             <div>
-                <label class="text-xs text-gray-400">要重置的用户账号</label>
-                <input type="text" name="target_username" required class="w-full border rounded-xl p-3 bg-gray-50">
+                <label class="text-[10px] text-gray-400 uppercase font-bold ml-1">目标用户名</label>
+                <input type="text" name="target_username" required placeholder="输入朋友的账号" 
+                       class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50 mt-1">
             </div>
             <div>
-                <label class="text-xs text-gray-400">设置新密码</label>
-                <input type="text" name="new_password" required class="w-full border rounded-xl p-3 bg-gray-50" placeholder="建议设为 123456">
+                <label class="text-[10px] text-gray-400 uppercase font-bold ml-1">新密码</label>
+                <input type="text" name="new_password" required placeholder="例如: 123456" 
+                       class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50 mt-1">
             </div>
-            <button type="submit" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold">执行重置</button>
-            <a href="/" class="block text-center text-sm text-gray-400 mt-2">返回主页</a>
+            <button type="submit" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform mt-2">
+                确认重置
+            </button>
+            <a href="/" class="block text-center text-xs text-gray-400 hover:text-gray-600">返回主页</a>
         </form>
     </div>
 </body>
+</html>
