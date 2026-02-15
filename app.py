@@ -18,7 +18,6 @@ def get_worksheet():
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     creds = Credentials.from_service_account_info(info, scopes=scopes)
     client = gspread.authorize(creds)
-    # 使用你的 ID 打开
     sh = client.open_by_key("1jsbu9uX51m02v_H1xNuTF3bukOZg-4phJecreh3dECs")
     return sh.get_worksheet(0)
 
@@ -31,14 +30,13 @@ def index():
         df.columns = [c.strip() for c in df.columns]
         df['备注'] = df['备注'].fillna('')
         
-        # 严格清洗标星逻辑
+        # 严格标星逻辑
         df['标星'] = df['标星'].apply(lambda x: str(x).upper() in ['TRUE', '1', '是', 'YES'])
         
         q = request.args.get('q', '').strip()
         if q:
             df = df[df['名称'].str.contains(q, case=False)]
 
-        # 置顶与分类数据
         starred = df[df['标星']].to_dict(orient='records')
         
         categories = ["影音视听", "系统学习", "词典工具", "移动应用", "其他"]
@@ -54,28 +52,31 @@ def index():
 
 @app.route('/toggle/<name>')
 def toggle(name):
+    # 对传入的名称进行解码和去空格处理
+    target_name = name.strip()
     sheet = get_worksheet()
-    # 重新读取最新数据防止索引错乱
     data = sheet.get_all_records()
+    
     for i, row in enumerate(data):
-        if str(row.get('名称')).strip() == name.strip():
-            # 找到对应的行（Excel从1开始，且带表头，所以是 i+2）
-            # 假设“标星”在 E 列（第 5 列）
-            current = str(row.get('标星')).upper() in ['TRUE', '1', '是', 'YES']
+        # 这里的比较必须极端精准
+        if str(row.get('名称', '')).strip() == target_name:
+            current = str(row.get('标星', '')).upper() in ['TRUE', '1', '是', 'YES']
             new_status = "TRUE" if not current else "FALSE"
-            sheet.update_cell(i + 2, 5, new_status) 
+            # 锁定第 5 列更新
+            sheet.update_cell(i + 2, 5, new_status)
             break
-    # 带上随机时间戳参数，强制 Vercel/浏览器 刷新页面内容
+            
+    # 使用时间戳强制跳过缓存刷新
     return redirect(url_for('index', q=request.args.get('q', ''), _t=time.time()))
 
 @app.route('/add', methods=['POST'])
 def add():
     sheet = get_worksheet()
     new_row = [
-        request.form.get('name'),
-        request.form.get('url'),
+        request.form.get('name').strip(),
+        request.form.get('url').strip(),
         request.form.get('type'),
-        request.form.get('note'),
+        request.form.get('note').strip(),
         "FALSE" 
     ]
     sheet.append_row(new_row)
@@ -89,6 +90,3 @@ def random_res():
         res = random.choice(data)
         return redirect(res['网址'])
     return redirect(url_for('index'))
-
-if __name__ == "__main__":
-    app.run()
