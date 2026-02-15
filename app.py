@@ -2,6 +2,7 @@ import os
 import json
 import random
 import time
+import re  # 导入正则
 from flask import Flask, render_template, request, redirect, url_for
 import gspread
 from google.oauth2.service_account import Credentials
@@ -9,12 +10,15 @@ import pandas as pd
 
 app = Flask(__name__)
 
+# 内部工具函数：移除所有空白字符（包括空格、制表符、不换行空格等）
+def clean_str(s):
+    return re.sub(r'\s+', '', str(s)).lower()
+
 def get_worksheet():
     creds_json = os.environ.get("GOOGLE_CREDS_JSON")
     if not creds_json:
         raise ValueError("GOOGLE_CREDS_JSON 缺失")
     info = json.loads(creds_json)
-    # 处理 PEM 换行符
     info['private_key'] = info['private_key'].replace('\\n', '\n')
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     creds = Credentials.from_service_account_info(info, scopes=scopes)
@@ -28,25 +32,22 @@ def index():
         sheet = get_worksheet()
         data = sheet.get_all_records()
         df = pd.DataFrame(data)
-        # 强制清除表头两端的不可见字符
         df.columns = [c.strip() for c in df.columns]
         df['备注'] = df['备注'].fillna('')
         
-        # 统一处理名称字段，防止因空格导致标星失效
-        df['名称'] = df['名称'].astype(str).str.strip()
+        # 预处理标星逻辑
         df['标星'] = df['标星'].apply(lambda x: str(x).upper() in ['TRUE', '1', '是', 'YES'])
         
         q = request.args.get('q', '').strip()
         if q:
             df = df[df['名称'].str.contains(q, case=False)]
 
-        # 置顶区域
         starred = df[df['标星']].to_dict(orient='records')
         
-        # 分类区域：现在保留所有资源，不再过滤已标星的
         categories = ["影音视听", "系统学习", "词典工具", "移动应用", "其他"]
         cat_data = {}
         for cat in categories:
+            # 置顶不消失：这里直接取该分类下的所有数据
             items = df[df['类型'] == cat].to_dict(orient='records')
             if items:
                 cat_data[cat] = items
@@ -57,17 +58,17 @@ def index():
 
 @app.route('/toggle/<name>')
 def toggle(name):
-    # 强制对传入的名称进行去空格处理
-    target_name = name.strip()
+    # 将前端传来的名称彻底“脱水”处理
+    target_clean = clean_str(name)
     sheet = get_worksheet()
     data = sheet.get_all_records()
     
     for i, row in enumerate(data):
-        # 解决 Slow German 等网站无法匹配的问题：两侧全部去空格对比
-        if str(row.get('名称', '')).strip() == target_name:
+        # 将表格里的名称也彻底“脱水”后再对比
+        if clean_str(row.get('名称', '')) == target_clean:
             current = str(row.get('标星', '')).upper() in ['TRUE', '1', '是', 'YES']
             new_status = "TRUE" if not current else "FALSE"
-            # 更新第 5 列 (E 列)
+            # 锁定第 5 列更新
             sheet.update_cell(i + 2, 5, new_status)
             break
             
