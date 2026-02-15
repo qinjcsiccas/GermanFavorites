@@ -33,57 +33,29 @@
     </style>
 </head>
 <body class="bg-gray-50 p-4 pb-12 text-slate-900">
-    <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold">🇩🇪 德语资源库</h1>
-    <div class="flex flex-col items-end">
-        <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-400 font-medium">👤 {{ user }}</span>
-            <a href="/logout" class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded hover:bg-red-50 hover:text-red-500">退出</a>
-        </div>
-        <button onclick="document.getElementById('pwModal').style.display='flex'" class="text-[10px] text-blue-400 mt-1">修改个人密码</button>
-    </div>
-</div>
 
-<div id="pwModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
-        <h3 class="font-bold mb-4 text-gray-800">修改个人密码</h3>
-        <form action="/change_password" method="post" class="space-y-4">
-            <input type="password" name="new_password" placeholder="输入新密码 (至少6位)" required 
-                   class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50">
-            <div class="flex gap-2">
-                <button type="button" onclick="document.getElementById('pwModal').style.display='none'" 
-                        class="flex-1 bg-gray-100 text-gray-500 py-2 rounded-xl text-sm font-medium">取消</button>
-                <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold text-sm shadow-lg">确认修改</button>
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold">🇩🇪 德语资源库</h1>
+        <div class="flex flex-col items-end">
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-400 font-medium">👤 {{ user }}</span>
+                <a href="/logout" class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded hover:bg-red-50 hover:text-red-500 transition-colors">退出</a>
             </div>
-        </form>
+            <button onclick="document.getElementById('pwModal').style.display='flex'" class="text-[10px] text-blue-400/80 mt-1 hover:text-blue-500">修改个人密码</button>
+        </div>
     </div>
-</div>
 
     <div class="flex items-center gap-2 mb-6 h-10">
         <button onclick="document.getElementById('addModal').style.display='flex'" 
-                class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100">
+                class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100 transition-colors">
             ➕ 新增
         </button>
         <form action="/" method="get" class="flex-1 h-full">
             <input type="text" name="q" value="{{ q }}" placeholder="🔍 快速搜索..." 
-                   class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none bg-white">
+                   class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white">
         </form>
-        <a href="/random" onclick="this.innerHTML='⏳'" class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm">🎲</a>
+        <a href="/random" onclick="this.innerHTML='⏳'" class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50">🎲</a>
     </div>
-
-    <button onclick="document.getElementById('pwModal').style.display='flex'" class="text-xs text-blue-400">修改密码</button>
-        <div id="pwModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
-            <div class="bg-white rounded-2xl w-full max-w-sm p-6">
-                <h3 class="font-bold mb-4">修改个人密码</h3>
-                <form action="/change_password" method="post" class="space-y-4">
-                    <input type="password" name="new_password" placeholder="输入新密码" required class="w-full border rounded-xl p-3 text-sm">
-                    <div class="flex gap-2">
-                        <button type="button" onclick="document.getElementById('pwModal').style.display='none'" class="flex-1 bg-gray-100 py-2 rounded-xl">取消</button>
-                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold">确认修改</button>
-                    </div>
-                </form>
-            </div>
-        </div>    
 
     {% if starred %}
     <div class="mb-6">
@@ -92,10 +64,10 @@
         </h3>
         <div class="space-y-2">
             {% for item in starred %}
-            <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-200">
-                <a href="{{ item.网址 }}" class="flex-1 min-w-0 mr-4">
+            <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
+                <a href="{{ item.网址 }}" target="_blank" class="flex-1 min-w-0 mr-4">
                     <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
-                    <div class="text-xs text-amber-700 no-wrap opacity-90">{{ item.备注 }}</div>
+                    <div class="text-xs text-amber-700 no-wrap opacity-80">{{ item.备注 }}</div>
                 </a>
                 <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="text-3xl flex-shrink-0">⭐</a>
             </div>
@@ -108,7 +80,7 @@
     <div class="space-y-4">
         {% for cat, items in cat_data.items() %}
         <details class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" open>
-            <summary class="flex items-center justify-between p-4 font-bold text-gray-600 cursor-pointer list-none active:bg-gray-100">
+            <summary class="flex items-center justify-between p-4 font-bold text-gray-600 cursor-pointer list-none active:bg-gray-50 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="text-lg">📂 {{ cat }}</span>
                     <span class="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full ml-1">{{ items|length }}</span>
@@ -117,8 +89,8 @@
             </summary>
             <div class="px-4 pb-2 space-y-1">
                 {% for item in items %}
-                <div class="res-row py-3 border-b border-gray-100 last:border-0">
-                    <a href="{{ item.网址 }}" class="flex-1 min-w-0 mr-4">
+                <div class="res-row py-3 border-b border-gray-50 last:border-0">
+                    <a href="{{ item.网址 }}" target="_blank" class="flex-1 min-w-0 mr-4">
                         <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
                         <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
                     </a>
@@ -133,21 +105,31 @@
         {% endfor %}
     </div>
 
+    <div id="pwModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+            <h3 class="font-bold mb-4 text-gray-800">修改个人密码</h3>
+            <form action="/change_password" method="post" class="space-y-4">
+                <input type="password" name="new_password" placeholder="输入新密码 (至少6位)" required 
+                       class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50">
+                <div class="flex gap-2">
+                    <button type="button" onclick="document.getElementById('pwModal').style.display='none'" 
+                            class="flex-1 bg-gray-100 text-gray-500 py-2 rounded-xl text-sm font-medium">取消</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold text-sm shadow-lg">确认修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
             <h3 class="text-lg font-bold mb-5 text-gray-800">添加新资源</h3>
             <form action="/add" method="post" class="space-y-4">
-                <input type="text" name="name" placeholder="资源名称 (例如: Easy German)" required class="w-full border border-gray-300 rounded-xl p-3 text-sm">
-                
-                <input type="url" name="url" placeholder="网址 (必须包含 http:// 或 https://)" required 
-                       class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400">
-                
-                <select name="type" class="w-full border border-gray-300 rounded-xl p-3 text-sm bg-white">
-                    {% for cat in categories %}
-                    <option value="{{ cat }}">{{ cat }}</option>
-                    {% endfor %}
+                <input type="text" name="name" placeholder="资源名称 (例如: Easy German)" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
+                <input type="url" name="url" placeholder="网址 (必须包含 http:// 或 https://)" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
+                <select name="type" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400">
+                    {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
                 </select>    
-                <input type="text" name="note" placeholder="备注" class="w-full border border-gray-300 rounded-xl p-3 text-sm">
+                <input type="text" name="note" placeholder="备注 (可选)" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
                 <div class="flex gap-3 mt-2">
                     <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-xl text-sm font-medium">取消</button>
                     <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-blue-200">确认添加</button>
@@ -159,10 +141,10 @@
     <script>
         // 综合反馈：震动 + 沙漏动画
         function triggerFeedback(el) {
-            el.classList.add('vibrate'); // 触发震动
+            el.classList.add('vibrate'); 
             setTimeout(() => {
-                el.innerHTML = '<span class="loading-spin">⏳</span>'; // 变为沙漏
-                el.style.pointerEvents = 'none'; // 禁用重复点击
+                el.innerHTML = '<span class="loading-spin">⏳</span>'; 
+                el.style.pointerEvents = 'none'; 
             }, 100);
         }
     </script>
