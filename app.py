@@ -92,12 +92,30 @@ def login():
     if request.method == 'POST':
         un = request.form.get('username', '').strip()
         pw = request.form.get('password', '')
+        
+        # 基础校验
+        if not un or not pw:
+            flash("请输入用户名和密码")
+            return redirect(url_for('login'))
+            
         u_sheet = get_user_sheet("Users")
-        for u in u_sheet.get_all_records():
-            if str(u.get('username')).strip() == un and check_password_hash(u.get('password'), pw):
-                session['user'] = un
-                return redirect(url_for('index'))
-        return "错误"
+        if not u_sheet:
+            flash("系统配置错误：找不到用户表")
+            return redirect(url_for('login'))
+            
+        users = u_sheet.get_all_records()
+        for u in users:
+            if str(u.get('username')).strip() == un:
+                if check_password_hash(u.get('password'), pw):
+                    session['user'] = un
+                    return redirect(url_for('index'))
+                else:
+                    flash("密码错误，请重试")
+                    return redirect(url_for('login'))
+        
+        flash("用户名不存在")
+        return redirect(url_for('login'))
+        
     return render_template('login.html')
 
 @app.route('/')
