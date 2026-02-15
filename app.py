@@ -3,14 +3,14 @@ import json
 import random
 import time
 import re
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import check_password_hash, generate_password_hash
 import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
-from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "german_2026_secure_key")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "german_study_secure_2026")
 
 def slugify(text):
     if not text: return ""
@@ -93,30 +93,57 @@ def login():
         un = request.form.get('username', '').strip()
         pw = request.form.get('password', '')
         
-        # 基础校验
-        if not un or not pw:
-            flash("请输入用户名和密码")
+        try:
+            u_sheet = get_user_sheet("Users")
+            if not u_sheet:
+                flash("系统错误：找不到用户表")
+                return redirect(url_for('login'))
+                
+            users = u_sheet.get_all_records()
+            for u in users:
+                # 统一转字符串对比，防止 Excel 格式干扰
+                if str(u.get('username', '')).strip() == un:
+                    if check_password_hash(str(u.get('password', '')), pw):
+                        session['user'] = un
+                        return redirect(url_for('index'))
+                    else:
+                        flash("密码错误，请重试")
+                        return redirect(url_for('login'))
+            
+            flash("用户名不存在")
             return redirect(url_for('login'))
             
-        u_sheet = get_user_sheet("Users")
-        if not u_sheet:
-            flash("系统配置错误：找不到用户表")
+        except Exception as e:
+            # 如果是 API 超时或权限问题，捕获它而不是直接报 500
+            print(f"Login Error: {e}")
+            flash("登录服务暂时不可用，请稍后再试")
             return redirect(url_for('login'))
             
-        users = u_sheet.get_all_records()
-        for u in users:
-            if str(u.get('username')).strip() == un:
-                if check_password_hash(u.get('password'), pw):
-                    session['user'] = un
-                    return redirect(url_for('index'))
-                else:
-                    flash("密码错误，请重试")
-                    return redirect(url_for('login'))
-        
-        flash("用户名不存在")
-        return redirect(url_for('login'))
-        
     return render_template('login.html')
+
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    new_pw = request.form.get('new_password')
+    if not new_pw or len(new_pw) < 6:
+        flash("新密码长度不能少于 6 位")
+        return redirect(url_for('index'))
+
+    try:
+        user_sheet = get_user_sheet("Users")
+        data = user_sheet.get_all_records()
+        for i, row in enumerate(data):
+            if str(row.get('username')).strip() == session['user']:
+                new_hash = generate_password_hash(new_pw)
+                user_sheet.update_cell(i + 2, 2, new_hash) # 更新 B 列密码
+                flash("密码修改成功！")
+                break
+    except Exception as e:
+        flash(f"修改失败: {e}")
+        
+    return redirect(url_for('index'))
 
 @app.route('/')
 def index():
