@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 强制禁止换行，解决 Streamlit 掉行问题 */
+        .no-wrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+</head>
+<body class="bg-gray-50 p-4 pb-20">
+    <h1 class="text-2xl font-bold mb-4">🇩🇪 德语资源库</h1>
+
+    {% if starred %}
+    <div class="mb-6">
+        <h2 class="text-sm font-bold text-orange-500 mb-2">🌟 核心精选 (已置顶)</h2>
+        {% for item in starred %}
+        <div class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm border border-orange-100 mb-2">
+            <a href="{{ item.网址 }}" class="flex-1 min-w-0 mr-4">
+                <div class="font-bold text-gray-800 no-wrap">{{ item.名称 }}</div>
+                <div class="text-xs text-gray-500 no-wrap">{{ item.备注 }}</div>
+            </a>
+            <a href="/toggle/{{ item.名称 }}" class="text-2xl px-2">⭐</a>
+        </div>
+        {% endfor %}
+    </div>
+    <hr class="mb-6">
+    {% endif %}
+
+    <div class="space-y-2">
+        {% for item in others %}
+        <div class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+            <a href="{{ item.网址 }}" class="flex-1 min-w-0 mr-4">
+                <div class="font-medium text-gray-700 no-wrap">{{ item.名称 }}</div>
+                <div class="text-xs text-gray-400 no-wrap">{{ item.备注 }}</div>
+            </a>
+            <a href="/toggle/{{ item.名称 }}" class="text-2xl px-2 text-gray-300">☆</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
