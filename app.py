@@ -1,6 +1,7 @@
 import os
 import json
 import random
+import time
 from flask import Flask, render_template, request, redirect, url_for
 import gspread
 from google.oauth2.service_account import Credentials
@@ -12,13 +13,12 @@ def get_worksheet():
     creds_json = os.environ.get("GOOGLE_CREDS_JSON")
     if not creds_json:
         raise ValueError("GOOGLE_CREDS_JSON 缺失")
-    
     info = json.loads(creds_json)
     info['private_key'] = info['private_key'].replace('\\n', '\n')
-    
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     creds = Credentials.from_service_account_info(info, scopes=scopes)
     client = gspread.authorize(creds)
+    # 使用你的 ID 打开
     sh = client.open_by_key("1jsbu9uX51m02v_H1xNuTF3bukOZg-4phJecreh3dECs")
     return sh.get_worksheet(0)
 
@@ -30,21 +30,20 @@ def index():
         df = pd.DataFrame(data)
         df.columns = [c.strip() for c in df.columns]
         df['备注'] = df['备注'].fillna('')
+        
+        # 严格清洗标星逻辑
         df['标星'] = df['标星'].apply(lambda x: str(x).upper() in ['TRUE', '1', '是', 'YES'])
         
-        # 搜索过滤
         q = request.args.get('q', '').strip()
         if q:
             df = df[df['名称'].str.contains(q, case=False)]
 
-        # 数据分类
+        # 置顶与分类数据
         starred = df[df['标星']].to_dict(orient='records')
         
-        # 分类展示逻辑
         categories = ["影音视听", "系统学习", "词典工具", "移动应用", "其他"]
         cat_data = {}
         for cat in categories:
-            # 下方列表只显示未标星的
             items = df[(df['类型'] == cat) & (~df['标星'])].to_dict(orient='records')
             if items:
                 cat_data[cat] = items
@@ -56,13 +55,18 @@ def index():
 @app.route('/toggle/<name>')
 def toggle(name):
     sheet = get_worksheet()
+    # 重新读取最新数据防止索引错乱
     data = sheet.get_all_records()
     for i, row in enumerate(data):
         if str(row.get('名称')).strip() == name.strip():
+            # 找到对应的行（Excel从1开始，且带表头，所以是 i+2）
+            # 假设“标星”在 E 列（第 5 列）
             current = str(row.get('标星')).upper() in ['TRUE', '1', '是', 'YES']
-            sheet.update_cell(i + 2, 5, "TRUE" if not current else "FALSE") # 标星在第5列
+            new_status = "TRUE" if not current else "FALSE"
+            sheet.update_cell(i + 2, 5, new_status) 
             break
-    return redirect(url_for('index', q=request.args.get('q', '')))
+    # 带上随机时间戳参数，强制 Vercel/浏览器 刷新页面内容
+    return redirect(url_for('index', q=request.args.get('q', ''), _t=time.time()))
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -72,7 +76,7 @@ def add():
         request.form.get('url'),
         request.form.get('type'),
         request.form.get('note'),
-        "FALSE" # 默认不标星
+        "FALSE" 
     ]
     sheet.append_row(new_row)
     return redirect(url_for('index'))
@@ -81,8 +85,10 @@ def add():
 def random_res():
     sheet = get_worksheet()
     data = sheet.get_all_records()
-    res = random.choice(data)
-    return redirect(res['网址'])
+    if data:
+        res = random.choice(data)
+        return redirect(res['网址'])
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run()
