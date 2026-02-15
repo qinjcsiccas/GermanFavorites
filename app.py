@@ -59,21 +59,26 @@ def register():
         try:
             gc = get_gc()
             sh = gc.open_by_key("1jsbu9uX51m02v_H1xNuTF3bukOZg-4phJecreh3dECs")
+            
+            # 1. 检查 Users 账号表是否存在同名
             user_sheet = sh.worksheet("Users")
             if any(str(u.get('username')).strip() == username for u in user_sheet.get_all_records()):
-                return "用户名已存在"
+                return "注册失败：该用户名已被注册。"
             
-            # 记录账号
+            # 2. 检查 Google Sheets 是否已存在同名标签页（防止 400 错误）
+            existing_sheets = [s.title for s in sh.worksheets()]
+            if username in existing_sheets:
+                return "注册失败：数据库中已存在同名子表，请联系管理员清理或换个名字。"
+            
+            # 执行记录和创建
             user_sheet.append_row([username, generate_password_hash(password_raw)])
-            
-            # 影子创建并初始化：使用 update 避免 500 错误
             new_ws = sh.add_worksheet(title=username, rows="100", cols="10")
             header_and_data = [["名称", "网址", "类型", "备注", "标星"]] + INITIAL_RESOURCES
             new_ws.update('A1', header_and_data)
             
             return redirect(url_for('login'))
         except Exception as e:
-            return f"注册系统繁忙: {str(e)}"
+            return f"系统异常: {str(e)}"
     return render_template('register.html')
 
 @app.route('/add', methods=['POST'])
