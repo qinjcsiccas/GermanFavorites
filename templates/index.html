@@ -55,7 +55,9 @@
 <body class="bg-gray-50 p-4 pb-12 text-slate-900">
 
     <div class="flex items-center justify-between mb-4">
-        <h1 class="text-2xl font-bold">🇩🇪 德语资源库</h1>
+        <h1 class="text-2xl font-bold flex items-center gap-2">
+            <span>🇩🇪</span> 德语资源库
+        </h1>
         <div class="flex items-center gap-2 bg-white/50 p-1.5 rounded-xl border border-gray-100 shadow-sm">
             <span class="text-xs text-gray-500 font-medium ml-1">👤 {{ user }}</span>
             <button onclick="document.getElementById('pwModal').style.display='flex'" 
@@ -144,7 +146,9 @@
                 <div class="relative">
                     <input type="password" id="new_pw" name="new_password" placeholder="设置新密码 (6位以上)" required 
                            class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
-                    <button type="button" onclick="togglePw('new_pw')" class="absolute right-4 top-4 text-gray-400">👁️</button>
+                    <button type="button" id="toggleBtn" onclick="togglePw('new_pw')" class="absolute right-4 top-4 text-gray-400 transition-all duration-200">
+                        🙈
+                    </button>
                 </div>
     
                 <input type="password" name="confirm_password" placeholder="再次确认新密码" required 
@@ -163,8 +167,18 @@
     
     <script>
     function togglePw(id) {
-        const el = document.getElementById(id);
-        el.type = el.type === 'password' ? 'text' : 'password';
+        const input = document.getElementById(id);
+        const btn = document.getElementById('toggleBtn');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerText = '🙉'; // 睁眼状态
+            btn.classList.add('text-blue-500'); // 睁眼时变蓝色提醒
+        } else {
+            input.type = 'password';
+            btn.innerText = '🙈'; // 闭眼状态
+            btn.classList.remove('text-blue-500');
+        }
     }
     </script>
 
