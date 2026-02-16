@@ -18,22 +18,22 @@
 
         /* 星星对齐 */
         .star-btn {
-            width: 32px;  /* 固定宽度 */
-            height: 32px; /* 固定高度 */
+            width: 36px;  /* 统一宽度 */
+            height: 36px; /* 统一高度 */
             display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
+            align-items: center;    /* 垂直居中 */
+            justify-content: center; /* 水平居 center */
             vertical-align: middle;
-            font-size: 1.25rem;
+            font-size: 1.35rem;     /* 稍微放大，让点击更轻松 */
             transition: transform 0.1s ease;
         }
         
-        /* 确保空心星星的描边不会撑大盒子 */
+        /* 针对空心星星的视觉重心微调 */
         .star-empty {
             color: #ffffff;
             text-shadow: 1px 1px 0 #9CA3AF, -1px -1px 0 #9CA3AF, 1px -1px 0 #9CA3AF, -1px 1px 0 #9CA3AF;
             display: inline-block;
-            transform: translateY(-1px); /* 微调视觉重心 */
+            transform: translateY(-1.5px); /* 向上微调，对齐轴心线 */
         }
 
         /* 触感反馈：微震动 */
@@ -127,10 +127,17 @@
                         <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
                         <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
                     </a>
-                    <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" 
-                       class="text-3xl flex-shrink-0 {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
-                        {{ '⭐' if item.标星 else '☆' }}
-                    </a>
+                    <div class="flex items-center gap-1">
+                        <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" 
+                           class="star-btn {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
+                            {{ '⭐' if item.标星 else '⭐' }}
+                        </a>
+
+                        <button onclick="openEditModal('{{ loop.index0 }}', '{{ item.名称 }}', '{{ item.网址 }}', '{{ item.类型 }}', '{{ item.备注 }}')" 
+                                class="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
+                            ✏️
+                        </button>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -200,7 +207,7 @@
             const btn = document.getElementById(btnId);
             if (input.type === 'password') {
                 input.type = 'text';
-                btn.innerText = '👁️';
+                btn.innerText = '🙉';
             } else {
                 input.type = 'password';
                 btn.innerText = '🙈';
@@ -258,43 +265,5 @@
         </script>
       {% endif %}
     {% endwith %}   
-
-    <div id="pwModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[60]">
-        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl">
-            <h3 class="font-bold mb-4 text-gray-800 text-center">🔐 修改安全密码</h3>
-            <form action="/change_password" method="post" class="space-y-3">
-                <input type="password" name="old_password" placeholder="请输入旧密码" required class="w-full border-none rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
-                <hr class="border-gray-50">
-                <div class="relative">
-                    <input type="password" id="new_pw" name="new_password" placeholder="新密码 (至少6位)" required class="w-full border-none rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
-                    <button type="button" id="eyeBtn" onclick="togglePw('new_pw', 'eyeBtn')" class="absolute right-4 top-3.5 text-lg">🙈</button>
-                </div>
-                <input type="password" name="confirm_password" placeholder="再次确认新密码" required class="w-full border-none rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="document.getElementById('pwModal').style.display='none'" class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm">取消</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg">确认修改</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="editModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[60]">
-        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl">
-            <h3 class="font-bold mb-4 text-gray-800">📝 修改资源</h3>
-            <form action="/edit_resource" method="post" class="space-y-3">
-                <input type="hidden" name="index" id="edit_index">
-                <input type="text" name="name" id="edit_name" required class="w-full border-none rounded-xl p-3.5 bg-gray-50 focus:ring-2 focus:ring-blue-400 text-sm">
-                <input type="text" name="url" id="edit_url" required class="w-full border-none rounded-xl p-3.5 bg-gray-50 focus:ring-2 focus:ring-blue-400 text-sm">
-                <select name="type" id="edit_type" class="w-full border-none rounded-xl p-3.5 bg-gray-50 focus:ring-2 focus:ring-blue-400 text-sm">
-                    {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
-                </select>
-                <textarea name="note" id="edit_note" class="w-full border-none rounded-xl p-3.5 bg-gray-50 focus:ring-2 focus:ring-blue-400 text-sm"></textarea>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="flex-1 text-gray-400">取消</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold">保存</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </body>
 </html>
