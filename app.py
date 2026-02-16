@@ -61,26 +61,32 @@ def register():
         try:
             gc = get_gc()
             sh = gc.open_by_key("1jsbu9uX51m02v_H1xNuTF3bukOZg-4phJecreh3dECs")
+            user_sheet = sh.worksheet("Users")
             
             # 1. 检查 Users 账号表是否存在同名
-            user_sheet = sh.worksheet("Users")
             if any(str(u.get('username')).strip() == username for u in user_sheet.get_all_records()):
-                return "注册失败：该用户名已被注册。"
+                flash("注册失败：用户名已存在")
+                return redirect(url_for('register'))
             
             # 2. 检查 Google Sheets 是否已存在同名标签页（防止 400 错误）
             existing_sheets = [s.title for s in sh.worksheets()]
             if username in existing_sheets:
-                return "注册失败：数据库中已存在同名子表，请联系管理员清理或换个名字。"
+                flash("注册失败：系统资源冲突，请尝试其他用户名")
+                return redirect(url_for('register'))
             
-            # 执行记录和创建
+            # 记录账号并初始化子表
             user_sheet.append_row([username, generate_password_hash(password_raw)])
             new_ws = sh.add_worksheet(title=username, rows="100", cols="10")
             header_and_data = [["名称", "网址", "类型", "备注", "标星"]] + INITIAL_RESOURCES
             new_ws.update('A1', header_and_data)
             
+            flash("注册成功！请登录")
             return redirect(url_for('login'))
+            
         except Exception as e:
-            return f"系统异常: {str(e)}"
+            flash(f"系统繁忙: {str(e)}")
+            return redirect(url_for('register'))
+            
     return render_template('register.html')
 
 @app.route('/add', methods=['POST'])
@@ -134,21 +140,24 @@ def change_password():
         return redirect(url_for('login'))
     
     new_pw = request.form.get('new_password')
+    # 简单的安全性长度检查
     if not new_pw or len(new_pw) < 6:
-        flash("新密码长度不能少于 6 位")
+        flash("密码太短啦，至少需要6位哦")
         return redirect(url_for('index'))
 
     try:
         user_sheet = get_user_sheet("Users")
         data = user_sheet.get_all_records()
         for i, row in enumerate(data):
+            # 精确匹配当前用户名
             if str(row.get('username')).strip() == session['user']:
                 new_hash = generate_password_hash(new_pw)
-                user_sheet.update_cell(i + 2, 2, new_hash) # 更新 B 列密码
-                flash("密码修改成功！")
+                # 更新 Users 表的第二列 (B列)
+                user_sheet.update_cell(i + 2, 2, new_hash) 
+                flash("密码修改成功！下次请用新密码登录")
                 break
     except Exception as e:
-        flash(f"修改失败: {e}")
+        flash(f"修改失败: {str(e)}")
         
     return redirect(url_for('index'))
 
