@@ -9,6 +9,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
+import csv
+from io import StringIO
+from flask import make_response
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "german_study_secure_2026")
@@ -256,3 +259,25 @@ def admin_reset():
         return redirect(url_for('admin_reset'))
 
     return render_template('admin_reset.html')
+
+@app.route('/export_csv')
+def export_csv():
+    if 'user' not in session: return redirect(url_for('login'))
+    
+    try:
+        sheet = get_user_sheet(session['user'])
+        data = sheet.get_all_records()
+        
+        # 创建内存中的 CSV 文件
+        si = StringIO()
+        cw = csv.DictWriter(si, fieldnames=["名称", "网址", "类型", "备注", "标星"])
+        cw.writeheader()
+        cw.writerows(data)
+        
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = f"attachment; filename={session['user']}_german_links.csv"
+        output.headers["Content-type"] = "text/csv; charset=utf-8-sig" # 确保中文不乱码
+        return output
+    except Exception as e:
+        flash(f"导出失败: {e}")
+        return redirect(url_for('index'))
