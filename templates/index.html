@@ -265,5 +265,24 @@
         </script>
       {% endif %}
     {% endwith %}   
+
+    <div id="editModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[60]">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl">
+            <h3 class="font-bold mb-4 text-gray-800 text-center">📝 修改资源信息</h3>
+            <form action="/edit_resource" method="post" class="space-y-3">
+                <input type="hidden" name="index" id="edit_index">
+                <input type="text" name="name" id="edit_name" required class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                <input type="text" name="url" id="edit_url" required class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                <select name="type" id="edit_type" class="w-full border border-gray-100 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-blue-400">
+                    {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
+                </select>
+                <textarea name="note" id="edit_note" class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none" rows="2"></textarea>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm">取消</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
