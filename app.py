@@ -109,6 +109,7 @@ def login():
     if request.method == 'POST':
         un = request.form.get('username', '').strip()
         pw = request.form.get('password', '')
+        remember = request.form.get('remember')  # 获取勾选框状态
 
         try:
             u_sheet = get_user_sheet("Users")
@@ -116,8 +117,13 @@ def login():
             for u in users:
                 if str(u.get('username', '')).strip() == un:
                     if check_password_hash(str(u.get('password', '')), pw):
-                        session.permanent = True  # 启用持久化
-                        app.permanent_session_lifetime = timedelta(days=7)
+                        # 核心逻辑：根据勾选状态决定是否持久化
+                        if remember:
+                            session.permanent = True  # 启用长效 Session
+                            app.permanent_session_lifetime = timedelta(days=7) # 设置为 7 天
+                        else:
+                            session.permanent = False # 浏览器关闭即失效
+                            
                         session['user'] = un
                         return redirect(url_for('index'))
                     else:
@@ -127,8 +133,7 @@ def login():
             flash("用户名不存在")
             return redirect(url_for('login'))
         except Exception as e:
-            print(f"Login Error: {e}")
-            flash("登录服务暂时不可用，请稍后再试")
+            flash("登录服务繁忙，请稍后再试")
             return redirect(url_for('login'))
             
     return render_template('login.html')
