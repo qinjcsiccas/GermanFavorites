@@ -109,10 +109,11 @@
                 class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100 transition-colors">
             ➕ 新增
         </button>
-        <form action="/" method="get" class="flex-1 h-full">
-            <input type="text" name="q" value="{{ q }}" placeholder="🔍 搜索资源、备注或分类..." 
+        <div class="flex-1 h-full">
+            <input type="text" id="liveSearchInput" oninput="liveSearch(this.value)" 
+                   placeholder="🔍 搜索资源、备注或分类..." 
                    class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white">
-        </form>
+        </div>
         <button id="randomBtn" onclick="feelLucky()" 
                 class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50 transition-all duration-300">
             🎲
@@ -212,12 +213,37 @@
     
     <script>
     // 1. 实时搜索：让 details 标签根据输入隐藏/显示
-        function doSearch(val) {
-            const cards = document.querySelectorAll('details');
-            const searchVal = val.toLowerCase();
-            cards.forEach(card => {
-                const text = card.innerText.toLowerCase();
-                card.style.display = text.includes(searchVal) ? 'block' : 'none';
+        // 升级版实时联想搜索
+        function liveSearch(val) {
+            const searchVal = val.toLowerCase().trim();
+            const categories = document.querySelectorAll('details'); // 获取所有文件夹
+        
+            categories.forEach(cat => {
+                const catName = cat.querySelector('summary').innerText.toLowerCase();
+                const items = cat.querySelectorAll('.res-row'); // 获取该分类下的每一行资源
+                let hasVisibleItem = false;
+        
+                items.forEach(item => {
+                    const text = item.innerText.toLowerCase();
+                    // 匹配资源名、备注或者分类名
+                    if (text.includes(searchVal) || catName.includes(searchVal)) {
+                        item.style.display = 'flex';
+                        hasVisibleItem = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+        
+                // 智能交互：
+                if (searchVal === "") {
+                    cat.style.display = 'block';
+                    cat.open = true; // 清空搜索时保持展开（或者设为 false 默认折叠）
+                } else if (hasVisibleItem) {
+                    cat.style.display = 'block';
+                    cat.open = true;  // 命中搜索时自动展开文件夹
+                } else {
+                    cat.style.display = 'none'; // 全都不匹配时隐藏整个文件夹
+                }
             });
         }
 
