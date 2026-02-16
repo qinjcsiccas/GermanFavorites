@@ -130,7 +130,7 @@
                     <div class="flex items-center gap-1">
                         <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" 
                            class="star-btn {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
-                            {{ '⭐' if item.标星 else '⭐' }}
+                            {{ '⭐' if item.标星 else '☆' }}
                         </a>
 
                         <button onclick="openEditModal('{{ loop.index0 }}', '{{ item.名称 }}', '{{ item.网址 }}', '{{ item.类型 }}', '{{ item.备注 }}')" 
@@ -161,7 +161,8 @@
                 <div class="relative">
                     <input type="password" id="new_pw" name="new_password" placeholder="设置新密码 (6位以上)" required 
                            class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
-                    <button type="button" id="toggleBtn" onclick="togglePw('new_pw')" class="absolute right-4 top-4 text-gray-400 transition-all duration-200">
+                    <button type="button" id="toggleBtn" onclick="togglePw('new_pw', 'toggleBtn')" 
+                            class="absolute right-4 top-4 text-gray-400 transition-all duration-200">
                         🙈
                     </button>
                 </div>
@@ -207,7 +208,7 @@
             const btn = document.getElementById(btnId);
             if (input.type === 'password') {
                 input.type = 'text';
-                btn.innerText = '🙉';
+                btn.innerText = '🙉'; // 这里的表情你可以换成喜欢的睁眼猴子或 👁️
             } else {
                 input.type = 'password';
                 btn.innerText = '🙈';
