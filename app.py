@@ -3,6 +3,7 @@ import json
 import random
 import time
 import re
+from datetime import timedelta
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash, generate_password_hash
 import gspread
@@ -106,23 +107,14 @@ def login():
         un = request.form.get('username', '').strip()
         pw = request.form.get('password', '')
 
-        if check_password_hash(user['password'], password):
-            session.permanent = True  # 添加这一行：设置为永久 Session
-            app.permanent_session_lifetime = timedelta(days=7) # 需要在开头 import timedelta
-            session['user'] = username
-            return redirect(url_for('index'))
-        
         try:
             u_sheet = get_user_sheet("Users")
-            if not u_sheet:
-                flash("系统错误：找不到用户表")
-                return redirect(url_for('login'))
-                
             users = u_sheet.get_all_records()
             for u in users:
-                # 统一转字符串对比，防止 Excel 格式干扰
                 if str(u.get('username', '')).strip() == un:
                     if check_password_hash(str(u.get('password', '')), pw):
+                        session.permanent = True  # 启用持久化
+                        app.permanent_session_lifetime = timedelta(days=7)
                         session['user'] = un
                         return redirect(url_for('index'))
                     else:
@@ -131,6 +123,11 @@ def login():
             
             flash("用户名不存在")
             return redirect(url_for('login'))
+        except Exception as e:
+            print(f"Login Error: {e}")
+            flash("登录服务暂时不可用")
+            return redirect(url_for('login'))
+    return render_template('login.html')
             
         except Exception as e:
             # 如果是 API 超时或权限问题，捕获它而不是直接报 500
