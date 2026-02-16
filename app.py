@@ -105,6 +105,12 @@ def login():
     if request.method == 'POST':
         un = request.form.get('username', '').strip()
         pw = request.form.get('password', '')
+
+        if check_password_hash(user['password'], password):
+            session.permanent = True  # 添加这一行：设置为永久 Session
+            app.permanent_session_lifetime = timedelta(days=7) # 需要在开头 import timedelta
+            session['user'] = username
+            return redirect(url_for('index'))
         
         try:
             u_sheet = get_user_sheet("Users")
@@ -133,6 +139,29 @@ def login():
             return redirect(url_for('login'))
             
     return render_template('login.html')
+
+@app.route('/edit_resource', methods=['POST'])
+def edit_resource():
+    if 'user' not in session: return redirect(url_for('login'))
+    
+    # 获取原始行号（前端传来的索引）
+    try:
+        idx = int(request.form.get('index'))
+        updated_row = [
+            request.form.get('name'),
+            request.form.get('url'),
+            request.form.get('type'),
+            request.form.get('note')
+        ]
+        
+        user_ws = get_user_sheet(session['user'])
+        # Google Sheets 索引从1开始，表头占1行，所以是 idx + 2
+        user_ws.update(f'A{idx + 2}:D{idx + 2}', [updated_row])
+        flash("资源已更新 ✨")
+    except Exception as e:
+        flash(f"更新失败: {str(e)}")
+        
+    return redirect(url_for('index'))
 
 @app.route('/change_password', methods=['POST'])
 def change_password():
