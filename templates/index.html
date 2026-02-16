@@ -16,6 +16,26 @@
             text-shadow: 1px 1px 0 #4B5563, -1px -1px 0 #4B5563, 1px -1px 0 #4B5563, -1px 1px 0 #4B5563;
         }
 
+        /* 星星对齐 */
+        .star-btn {
+            width: 32px;  /* 固定宽度 */
+            height: 32px; /* 固定高度 */
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            font-size: 1.25rem;
+            transition: transform 0.1s ease;
+        }
+        
+        /* 确保空心星星的描边不会撑大盒子 */
+        .star-empty {
+            color: #ffffff;
+            text-shadow: 1px 1px 0 #9CA3AF, -1px -1px 0 #9CA3AF, 1px -1px 0 #9CA3AF, -1px 1px 0 #9CA3AF;
+            display: inline-block;
+            transform: translateY(-1px); /* 微调视觉重心 */
+        }
+
         /* 触感反馈：微震动 */
         .vibrate { animation: vibrate 0.2s linear; }
         @keyframes vibrate {
@@ -36,12 +56,15 @@
 
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-bold">🇩🇪 德语资源库</h1>
-        <div class="flex flex-col items-end">
-            <div class="flex items-center gap-2">
-                <span class="text-xs text-gray-400 font-medium">👤 {{ user }}</span>
-                <a href="/logout" class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded hover:bg-red-50 hover:text-red-500 transition-colors">退出</a>
-            </div>
-            <button onclick="document.getElementById('pwModal').style.display='flex'" class="text-[10px] text-blue-400 mt-1 hover:text-blue-600">修改个人密码</button>
+        <div class="flex items-center gap-2 bg-white/50 p-1.5 rounded-xl border border-gray-100 shadow-sm">
+            <span class="text-xs text-gray-500 font-medium ml-1">👤 {{ user }}</span>
+            <button onclick="document.getElementById('pwModal').style.display='flex'" 
+                    class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-lg hover:bg-blue-100 transition-colors font-bold">
+                修改密码
+            </button>
+            <a href="/logout" class="text-[10px] bg-red-50 text-red-500 px-2 py-1 rounded-lg hover:bg-red-100 transition-colors font-bold">
+                退出
+            </a>
         </div>
     </div>
 
@@ -105,20 +128,45 @@
         {% endfor %}
     </div>
 
-    <div id="pwModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
-            <h3 class="font-bold mb-4 text-gray-800">修改个人密码</h3>
-            <form action="/change_password" method="post" class="space-y-4">
-                <input type="password" name="new_password" placeholder="输入新密码 (至少6位)" required 
-                       class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50">
-                <div class="flex gap-2">
+    <div id="pwModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[60]">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">🔐</div>
+                <h3 class="font-bold text-gray-800">安全修改密码</h3>
+            </div>
+            
+            <form action="/change_password" method="post" class="space-y-3">
+                <input type="password" name="old_password" placeholder="请输入当前旧密码" required 
+                       class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
+                
+                <div class="h-px bg-gray-100 my-2"></div>
+                
+                <div class="relative">
+                    <input type="password" id="new_pw" name="new_password" placeholder="设置新密码 (6位以上)" required 
+                           class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
+                    <button type="button" onclick="togglePw('new_pw')" class="absolute right-4 top-4 text-gray-400">👁️</button>
+                </div>
+    
+                <input type="password" name="confirm_password" placeholder="再次确认新密码" required 
+                       class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
+                
+                <div class="flex gap-2 pt-4">
                     <button type="button" onclick="document.getElementById('pwModal').style.display='none'" 
-                            class="flex-1 bg-gray-100 text-gray-500 py-2 rounded-xl text-sm font-medium">取消</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold text-sm shadow-lg">确认修改</button>
+                            class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm font-medium">取消</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+                        确认修改
+                    </button>
                 </div>
             </form>
         </div>
     </div>
+    
+    <script>
+    function togglePw(id) {
+        const el = document.getElementById(id);
+        el.type = el.type === 'password' ? 'text' : 'password';
+    }
+    </script>
 
     <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
