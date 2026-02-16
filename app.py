@@ -136,29 +136,36 @@ def login():
 
 @app.route('/change_password', methods=['POST'])
 def change_password():
-    if 'user' not in session:
-        return redirect(url_for('login'))
+    if 'user' not in session: return redirect(url_for('login'))
     
+    old_pw = request.form.get('old_password')
     new_pw = request.form.get('new_password')
-    # 简单的安全性长度检查
-    if not new_pw or len(new_pw) < 6:
-        flash("密码太短啦，至少需要6位哦")
+    confirm_pw = request.form.get('confirm_password')
+
+    if new_pw != confirm_pw:
+        flash("两次输入的新密码不一致 ❌")
+        return redirect(url_for('index'))
+    
+    if len(new_pw) < 6:
+        flash("新密码至少需要 6 位 🔒")
         return redirect(url_for('index'))
 
     try:
         user_sheet = get_user_sheet("Users")
-        data = user_sheet.get_all_records()
-        for i, row in enumerate(data):
-            # 精确匹配当前用户名
+        users = user_sheet.get_all_records()
+        for i, row in enumerate(users):
             if str(row.get('username')).strip() == session['user']:
-                new_hash = generate_password_hash(new_pw)
-                # 更新 Users 表的第二列 (B列)
-                user_sheet.update_cell(i + 2, 2, new_hash) 
-                flash("密码修改成功！下次请用新密码登录")
-                break
+                # 校验旧密码
+                if check_password_hash(str(row.get('password')), old_pw):
+                    new_hash = generate_password_hash(new_pw)
+                    user_sheet.update_cell(i + 2, 2, new_hash)
+                    flash("密码修改成功！下次登录生效 ✨")
+                    return redirect(url_for('index'))
+                else:
+                    flash("旧密码输入错误 🛡️")
+                    return redirect(url_for('index'))
     except Exception as e:
-        flash(f"修改失败: {str(e)}")
-        
+        flash(f"系统错误: {str(e)}")
     return redirect(url_for('index'))
 
 @app.route('/')
