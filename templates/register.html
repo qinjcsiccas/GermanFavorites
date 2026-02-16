@@ -12,17 +12,38 @@
             <h1 class="text-2xl font-bold text-gray-800">创建新账号</h1>
             <p class="text-gray-400 text-sm mt-1">加入德语学习资源共享</p>
         </div>
+    
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-[13px] rounded flex justify-between items-center animate-pulse">
+                  <span>⚠️ {{ message }}</span>
+                  <button onclick="this.parentElement.remove()" class="text-red-400 text-lg ml-2">&times;</button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    
         <form action="/register" method="post" class="space-y-4">
             <input type="text" name="username" placeholder="设置用户名" required 
                    class="w-full border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50">
+            
             <input type="password" name="password" placeholder="设置密码" required 
                    class="w-full border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50">
+            
             <button type="submit" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-green-200 active:scale-95 transition-transform">
                 完成注册
             </button>
         </form>
+    
         <div class="text-center mt-6">
-            <a href="/login" class="text-gray-500 text-sm font-medium">已有账号？返回登录</a>
+            <a href="/login" class="text-blue-500 text-sm font-medium">已有账号？立即登录</a>
+        </div>
+    
+        <div class="mt-8 pt-6 border-t border-gray-50 text-center">
+            <p class="text-[10px] text-gray-400 leading-relaxed italic">
+                🔒 您的隐私受哈希加密保护。即使是管理员也无法查看您的原始密码。
+            </p>
         </div>
     </div>
 </body>
