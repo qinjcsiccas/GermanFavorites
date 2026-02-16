@@ -325,7 +325,26 @@
                 navigator.vibrate([10, 30, 10]); // 短促的两次震动
             }            
             const btn = document.getElementById('randomBtn');
-            const tips = ["正在为您寻找德语秘境...", "看看今天学点什么好呢？", "德语之神正在挑选...", "正在加载惊喜..."];
+            const tips = [
+                "正在为您寻找德语秘境...",
+                "Looking for German secrets...",
+                "Deutsch-Gott wählt aus...", 
+                "看看今天学点什么好呢？",
+                "Was lernen wir heute?", 
+                "德语之神正在挑选...",
+                "Selecting your destiny...",
+                "Viel Glück heute!",
+                "正在加载惊喜...",
+                "Surprise is loading...",
+                "Eine Überraschung kommt!",
+                // --- 以下是关于你的开发者彩蛋 ---
+                "Built with ❤️ by Jincheng Qin.",
+                "Jincheng 祝你德语进步！",
+                "Ready for the next challenge?",
+                "Keep calm and learn German.",
+                "Jincheng 正在为你同步云端资源...",
+                "Viel Spaß beim Lernen!" // 祝学习愉快！
+            ];
             const randomTip = tips[Math.floor(Math.random() * tips.length)];
         
             // 1. 开始仪式：增加动画和发光
@@ -340,14 +359,25 @@
             }, 800);
         }
         
-        // 辅助函数：显示一个简单的 Toast
+        // 屏幕中心悬浮气泡
         function showToast(msg) {
             const toast = document.createElement('div');
-            toast.className = "fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white text-xs px-6 py-3 rounded-full shadow-2xl z-[200] animate-bounce";
-            toast.innerText = msg;
+            toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900/90 backdrop-blur-md text-white text-lg font-bold px-10 py-5 rounded-3xl shadow-2xl z-[200] animate-in zoom-in duration-300 text-center min-w-[240px]";
+            // 增加一点星星装饰增强仪式感
+            toast.innerHTML = `
+                <div class="text-2xl mb-2">✨</div>
+                <div class="font-medium">${msg}</div>
+            `;
+            
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
-        }        
+            
+            // 2.5秒后淡出并移除
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 2500);
+        }       
     </script>
         
     {% with messages = get_flashed_messages() %}
