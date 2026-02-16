@@ -50,7 +50,27 @@
         /* 加载动画：旋转 */
         .loading-spin { animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* 骰子疯狂旋转动画 */
+        .dice-spin {
+            animation: dice-shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes dice-shake {
+            0% { transform: rotate(0deg) scale(1.1); }
+            25% { transform: rotate(90deg) scale(1.2); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            75% { transform: rotate(270deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        /* 让骰子看起来在发光 */
+        .dice-glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6 !important;
+        }        
     </style>
+    
 </head>
 <body class="bg-gray-50 min-h-screen pb-20">
     <div class="h-1 w-full flex">
@@ -62,13 +82,25 @@
     <div class="max-w-md mx-auto p-4">
         <div class="flex items-center justify-between mb-6 px-1">
             <h1 class="text-2xl font-bold flex items-center gap-2"><span>🇩🇪</span> 德语资源库</h1>
-            <div class="flex items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl border border-gray-100 shadow-sm backdrop-blur-sm">
+            <div class="flex items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl border border-gray-100 shadow-sm backdrop-blur-sm relative">
                 <span class="text-[11px] text-gray-400 font-medium px-1">👤 {{ user }}</span>
-                <button onclick="document.getElementById('pwModal').style.display='flex'" 
-                        class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl hover:bg-blue-100 transition-colors font-bold">
-                    修改密码
-                </button>
-                <a href="/logout" class="text-[10px] bg-red-50 text-red-500 px-3 py-1.5 rounded-xl hover:bg-red-100 font-bold">退出</a>
+                
+                <button onclick="toggleSettings()" class="text-lg px-2 hover:bg-gray-100 rounded-xl transition-all">⚙️</button>
+            
+                <div id="settingsMenu" style="display:none;" class="absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-2xl border border-gray-50 z-[100] py-2 animate-in slide-in-from-top-2 duration-200">
+                    <button onclick="openModal('pwModal')" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2">
+                        🔐 修改密码
+                    </button>
+                    <a href="/export_csv" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2">
+                        📥 导出收藏
+                    </a>
+                    <a href="mailto:1419629781@qq.com?subject=德语资源库反馈&body=你好Jincheng，我想反馈：" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2 border-t border-gray-50">
+                        📧 联系开发者
+                    </a>
+                    <a href="/logout" class="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2 border-t border-gray-50 font-bold">
+                        🚪 退出登录
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -87,7 +119,10 @@
             <input type="text" name="q" value="{{ q }}" placeholder="🔍 快速搜索..." 
                    class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white">
         </form>
-        <a href="/random" onclick="this.innerHTML='⏳'" class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50">🎲</a>
+        <button id="randomBtn" onclick="feelLucky()" 
+                class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50 transition-all duration-300">
+            🎲
+        </button>
     </div>
 
     {% if starred %}
@@ -214,6 +249,27 @@
                 btn.innerText = '🙈';
             }
         }
+
+        // 切换设置菜单显示
+        function toggleSettings() {
+            const menu = document.getElementById('settingsMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // 点击页面其他地方关闭菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('settingsMenu');
+            const btn = e.target.closest('button');
+            if (!menu.contains(e.target) && (!btn || btn.innerText !== '⚙️')) {
+                menu.style.display = 'none';
+            }
+        });
+        
+        // 统一打开 Modal 的函数
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+            document.getElementById('settingsMenu').style.display = 'none';
+        }
     </script>
 
     <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
@@ -243,7 +299,37 @@
                 el.style.pointerEvents = 'none'; 
             }, 100);
         }
+
+        function feelLucky() {
+            if (navigator.vibrate) {
+                navigator.vibrate([10, 30, 10]); // 短促的两次震动
+            }            
+            const btn = document.getElementById('randomBtn');
+            const tips = ["正在为您寻找德语秘境...", "看看今天学点什么好呢？", "德语之神正在挑选...", "正在加载惊喜..."];
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+        
+            // 1. 开始仪式：增加动画和发光
+            btn.classList.add('dice-spin', 'dice-glow');
+            
+            // 2. 弹出仪式感提示（使用你现有的 Toast 逻辑）
+            showToast(randomTip); // 如果你之前有 showToast 函数
+        
+            // 3. 延迟 800ms 后跳转，给动画留出表现时间
+            setTimeout(() => {
+                window.location.href = '/random';
+            }, 800);
+        }
+        
+        // 辅助函数：显示一个简单的 Toast
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-800/90 text-white text-xs px-6 py-3 rounded-full shadow-2xl z-[200] animate-bounce";
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }        
     </script>
+        
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <div id="toast-container" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] space-y-2">
@@ -253,6 +339,7 @@
             </div>
           {% endfor %}
         </div>
+        
         <script>
             // 3秒后自动消失
             setTimeout(() => {
