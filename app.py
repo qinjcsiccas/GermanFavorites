@@ -125,13 +125,6 @@ def login():
             return redirect(url_for('login'))
         except Exception as e:
             print(f"Login Error: {e}")
-            flash("登录服务暂时不可用")
-            return redirect(url_for('login'))
-    return render_template('login.html')
-            
-        except Exception as e:
-            # 如果是 API 超时或权限问题，捕获它而不是直接报 500
-            print(f"Login Error: {e}")
             flash("登录服务暂时不可用，请稍后再试")
             return redirect(url_for('login'))
             
