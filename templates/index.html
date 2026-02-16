@@ -41,7 +41,7 @@
                 <span class="text-xs text-gray-400 font-medium">👤 {{ user }}</span>
                 <a href="/logout" class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded hover:bg-red-50 hover:text-red-500 transition-colors">退出</a>
             </div>
-            <button onclick="document.getElementById('pwModal').style.display='flex'" class="text-[10px] text-blue-400/80 mt-1 hover:text-blue-500">修改个人密码</button>
+            <button onclick="document.getElementById('pwModal').style.display='flex'" class="text-[10px] text-blue-400 mt-1 hover:text-blue-600">修改个人密码</button>
         </div>
     </div>
 
@@ -169,6 +169,24 @@
             }, 3000);
         </script>
       {% endif %}
-    {% endwith %}
+    {% endwith %}   
+
+    <div id="pwModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <h3 class="font-bold mb-4 text-gray-800 flex items-center gap-2">🔐 修改个人密码</h3>
+            <form action="/change_password" method="post" class="space-y-4">
+                <input type="password" name="new_password" placeholder="输入新密码 (至少6位)" required 
+                       class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50">
+                
+                <div class="flex gap-2">
+                    <button type="button" onclick="document.getElementById('pwModal').style.display='none'" 
+                            class="flex-1 bg-gray-100 text-gray-500 py-2 rounded-xl text-sm font-medium">取消</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+                        确认修改
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
