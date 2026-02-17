@@ -458,7 +458,7 @@
             <h3 class="text-lg font-bold mb-5 text-gray-800">添加新资源</h3>
             <form action="/add" method="post" class="space-y-4">
                 <input type="text" name="name" placeholder="资源名称 (例如: Easy German)" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
-                <input type="url" name="url" placeholder="网址 (必须包含 http:// 或 https://)" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
+                <input type="url" name="url" value="https://" placeholder="网址 (必须包含 http:// 或 https://)" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
                 <select name="type" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400">
                     {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
                 </select>    
@@ -591,12 +591,18 @@
         
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <div id="toast-container" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] space-y-2">
-          {% for message in messages %}
-            <div class="bg-gray-800/90 backdrop-blur text-white text-xs px-6 py-3 rounded-full shadow-2xl animate-bounce">
-                {{ message }}
-            </div>
-          {% endfor %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                {% for message in messages %}
+                    // 调用你现有的 showToast 函数，并传入 ✨ 图标
+                    if (typeof showToast === 'function') {
+                        showToast("{{ message }}", "✨");
+                    }
+                {% endfor %}
+            });
+        </script>
+      {% endif %}
+    {% endwith %}
         </div>
         
         <script>
