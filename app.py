@@ -207,9 +207,12 @@ def index():
         df['标星'] = df['标星'].apply(lambda x: str(x).upper() in ['TRUE', '1', '是', 'YES'])
         if q: df = df[df['名称'].str.contains(q, case=False)]
         starred = df[df['标星']].to_dict(orient='records')
+        starred.sort(key=lambda x: x.get('名称', '').lower()
         for cat in UI_CATEGORIES:
             items = df[df['类型'] == cat].to_dict(orient='records')
             if items: cat_data[cat] = items
+        for cat in cat_data:
+            cat_data[cat].sort(key=lambda x: x.get('名称', '').lower())
         return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
     except:
         return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
