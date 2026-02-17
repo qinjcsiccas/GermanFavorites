@@ -98,17 +98,24 @@ def register():
 @app.route('/add', methods=['POST'])
 def add():
     if 'user' not in session: return redirect(url_for('login'))
+    
     url = request.form.get('url', '').strip()
     name = request.form.get('name', '').strip()
-    
+
+    # --- 1. 在这里增加补齐逻辑 ---
+    if url and not url.startswith(('http://', 'https://')):
+        url = 'https://' + url
+    # ---------------------------
+
+    # --- 2. 然后再进行你原本的校验 ---
     if not is_valid_url(url):
         flash("网址格式有误，请重试 ⚠️")
         return redirect(url_for('index'))
     
     sheet = get_user_sheet(session['user'])
+    # 注意：这里存入 sheet 的 url 已经是补齐后的了
     sheet.append_row([name, url, request.form.get('type'), request.form.get('note').strip(), "FALSE"])
     
-    # 增加这句 Flash 消息，文案对齐四字文艺风
     flash(f"手摘星辰，点亮{name[:4]} ✨") 
     return redirect(url_for('index'))
 
@@ -153,9 +160,16 @@ def edit_resource():
     # 获取原始行号（前端传来的索引）
     try:
         idx = int(request.form.get('index'))
+        
+        # --- 增加以下 4 行逻辑，用于补齐和清洗 ---
+        raw_url = request.form.get('url', '').strip()
+        if raw_url and not raw_url.startswith(('http://', 'https://')):
+            raw_url = 'https://' + raw_url
+        # ---------------------------------------
+
         updated_row = [
             request.form.get('name'),
-            request.form.get('url'),
+            raw_url,  # 这里改用处理后的 raw_url
             request.form.get('type'),
             request.form.get('note')
         ]
