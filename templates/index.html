@@ -98,7 +98,7 @@
     <div class="max-w-md mx-auto p-4 md:px-0">
 
         <div class="flex items-center justify-between mb-6 px-1">
-            <h1 class="text-2xl font-bold flex items-center gap-2"><span>🇩🇪</span> 德语资源库</h1>
+            <h1 class="text-2xl font-bold flex items-center gap-2"><span>🇩🇪</span> 德语星 </h1>
             <div class="flex items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl border border-gray-100 shadow-sm backdrop-blur-sm relative">
                 <span class="text-[11px] text-gray-400 font-medium px-1">👤 {{ user }}</span>
                 
@@ -136,35 +136,41 @@
             🎲
         </button>
     </div>
-
-    {% if starred %}
-    <div class="mb-6">
-        
-        <div class="mb-4 flex items-center gap-4 px-1">
-        <button id="tab-starred" onclick="switchTab('starred')" 
-                class="text-[11px] font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1">
-            <span class="w-1 h-3 bg-amber-600 rounded-full"></span> 标星
-        </button>
-        <button id="tab-history" onclick="switchTab('history')" 
-                class="text-[11px] font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1">
-            <span class="w-1 h-3 bg-gray-300 rounded-full"></span> 足迹
-        </button>
-    </div>
     
-    <div id="content-starred" class="mb-6 space-y-2">
-        {% if starred %}
-            {% for item in starred %}
-            <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
-                <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
-                    <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
-                    <div class="text-xs text-amber-700 no-wrap opacity-80">{{ item.备注 }}</div>
-                </a>
-                <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="text-3xl flex-shrink-0">⭐</a>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="text-center py-4 text-xs text-gray-400 bg-gray-100/50 rounded-xl border border-dashed">暂无置顶资源</div>
-        {% endif %}
+    <div class="mb-6">
+        <div class="mb-4 flex items-center gap-4 px-1">
+            <button id="tab-starred" onclick="switchTab('starred')" 
+                    class="text-[11px] font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1">
+                <span class="w-1 h-3 bg-amber-600 rounded-full"></span> 万象星选
+            </button>
+            <button id="tab-history" onclick="switchTab('history')" 
+                    class="text-[11px] font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1">
+                <span class="w-1 h-3 bg-gray-300 rounded-full"></span> 流光碎影
+            </button>
+        </div>
+        
+        <div id="content-starred" class="space-y-2">
+            {% if starred %}
+                {% for item in starred %}
+                <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
+                    <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
+                        <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
+                        <div class="text-xs text-amber-700 no-wrap opacity-80">{{ item.备注 }}</div>
+                    </a>
+                    <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="text-3xl flex-shrink-0">⭐</a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-6 text-xs text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                    星海广袤，待你采撷
+                </div>
+            {% endif %}
+        </div>
+    
+        <div id="content-history" class="space-y-2" style="display: none;">
+            <div id="history-list" class="space-y-2">
+                </div>
+        </div>
     </div>
     
     <div id="content-history" class="mb-6 space-y-2" style="display: none;">
@@ -362,7 +368,7 @@
             const container = document.getElementById('history-list');
             
             if (history.length === 0) {
-                container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400 bg-gray-100/50 rounded-xl border border-dashed">尚无浏览记录</div>';
+                container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400 bg-gray-100/50 rounded-xl border border-dashed"> 浮光掠影，待君重寻 </div>';
                 return;
             }
         
