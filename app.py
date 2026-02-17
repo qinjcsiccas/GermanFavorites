@@ -116,7 +116,7 @@ def add():
     # 注意：这里存入 sheet 的 url 已经是补齐后的了
     sheet.append_row([name, url, request.form.get('type'), request.form.get('note').strip(), "FALSE"])
     
-    flash(f"手摘星辰，点亮{name[:4]} ✨") 
+    flash(f"手摘星辰，点亮{name[:4]} ") 
     return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
