@@ -359,7 +359,7 @@ def delete_resource():
         for i, row in enumerate(records):
             if str(row.get('名称')) == name_to_delete and str(row.get('网址')) == url_to_delete:
                 user_ws.delete_rows(i + 2)
-                flash(f"已成功删除资源：{name_to_delete} 🗑️")
+                flash(f"🗑️已成功删除资源：<br><strong>{name_to_delete}</strong>")
                 break
     except Exception as e:
         flash(f"删除失败: {str(e)}")
