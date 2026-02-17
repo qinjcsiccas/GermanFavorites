@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.security import check_password_hash, generate_password_hash
 import gspread
 from google.oauth2.service_account import Credentials
-import pandas as pd
+# import pandas as pd
 import csv
 from io import StringIO
 from flask import make_response
