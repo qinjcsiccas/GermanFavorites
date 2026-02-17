@@ -97,11 +97,17 @@ def register():
 def add():
     if 'user' not in session: return redirect(url_for('login'))
     url = request.form.get('url', '').strip()
+    name = request.form.get('name', '').strip()
+    
     if not is_valid_url(url):
-        return "⚠️ 网址格式错误！必须以 http:// 或 https:// 开头"
+        flash("网址格式有误，请重试 ⚠️")
+        return redirect(url_for('index'))
     
     sheet = get_user_sheet(session['user'])
-    sheet.append_row([request.form.get('name').strip(), url, request.form.get('type'), request.form.get('note').strip(), "FALSE"])
+    sheet.append_row([name, url, request.form.get('type'), request.form.get('note').strip(), "FALSE"])
+    
+    # 增加这句 Flash 消息，文案对齐四字文艺风
+    flash(f"手摘星辰，点亮{name[:4]} ✨") 
     return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
