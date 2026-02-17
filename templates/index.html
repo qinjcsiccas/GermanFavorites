@@ -595,9 +595,10 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 {% for message in messages %}
-                    // 调用你现有的 showToast 函数，并传入 ✨ 图标
                     if (typeof showToast === 'function') {
-                        showToast("{{ message }}", "✨");
+                        // 如果消息包含“删除”，图标换成垃圾桶 🗑️，否则用星星 ✨
+                        let icon = "{{ message }}".includes("删除") ? "🗑️" : "✨";
+                        showToast("{{ message }}", icon);
                     }
                 {% endfor %}
             });
