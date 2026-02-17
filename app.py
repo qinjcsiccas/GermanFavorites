@@ -207,7 +207,7 @@ def change_password():
 def index():
     if 'user' not in session: return redirect(url_for('login'))
     
-    # 1. 预定义变量，确保安全性
+    # 核心修复：预初始化空变量，彻底防止 except 块崩溃
     starred = []
     cat_data = {}
     q = request.args.get('q', '').strip().lower()
@@ -217,43 +217,44 @@ def index():
         if not sheet:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
             
-        # 获取所有原始数据
+        # 使用原生列表处理，替代沉重的 pandas
         records = sheet.get_all_records()
         if not records:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
-        # 2. 替代 pandas 的清洗与过滤逻辑
-        filtered_records = []
+        # 清洗与过滤逻辑
+        all_items = []
         for r in records:
-            # 清理键名空格
-            cleaned_r = {str(k).strip(): v for k, v in r.items()}
-            # 统一处理标星逻辑
-            is_starred = str(cleaned_r.get('标星', '')).upper() in ['TRUE', '1', '是', 'YES']
-            cleaned_r['标星'] = is_starred
-            cleaned_r['备注'] = cleaned_r.get('备注', '') or ''
+            # 去除键名空格并处理空值
+            item = {str(k).strip(): (v if v is not None else "") for k, v in r.items()}
             
-            # 搜索过滤
+            # 统一标星判断逻辑
+            is_star = str(item.get('标星', '')).upper() in ['TRUE', '1', '是', 'YES']
+            item['标星'] = is_star
+            
+            # 执行搜索过滤
             if q:
-                if q in str(cleaned_r.get('名称', '')).lower() or q in str(cleaned_r.get('备注', '')).lower():
-                    filtered_records.append(cleaned_r)
+                if q in str(item.get('名称', '')).lower() or q in str(item.get('备注', '')).lower():
+                    all_items.append(item)
             else:
-                filtered_records.append(cleaned_r)
+                all_items.append(item)
 
-        # 3. 提取并排序“万象星选”
-        starred = [r for r in filtered_records if r['标星']]
+        # 1. 提取并按字母排序“万象星选”
+        starred = [i for i in all_items if i['标星']]
         starred.sort(key=lambda x: str(x.get('名称', '')).lower())
 
-        # 4. 提取并排序分类内容
+        # 2. 按分类归纳并排序板块内容
         for cat in UI_CATEGORIES:
-            items = [r for r in filtered_records if r.get('类型') == cat]
-            if items:
-                items.sort(key=lambda x: str(x.get('名称', '')).lower())
-                cat_data[cat] = items
+            cat_list = [i for i in all_items if i.get('类型') == cat]
+            if cat_list:
+                cat_list.sort(key=lambda x: str(x.get('名称', '')).lower())
+                cat_data[cat] = cat_list
         
         return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
     
     except Exception as e:
-        print(f"Index Logic Fatal Error: {str(e)}") 
+        # 即使发生网络波动，也保证页面能正常渲染出空星海
+        print(f"Server Logic Error: {str(e)}") 
         return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
 @app.route('/logout')
