@@ -206,11 +206,18 @@ def index():
         df['备注'] = df['备注'].fillna('')
         df['标星'] = df['标星'].apply(lambda x: str(x).upper() in ['TRUE', '1', '是', 'YES'])
         if q: df = df[df['名称'].str.contains(q, case=False)]
+        
+        # 1. 提取标星内容并排序 (注意补全末尾的括号)
         starred = df[df['标星']].to_dict(orient='records')
-        starred.sort(key=lambda x: x.get('名称', '').lower()
+        starred.sort(key=lambda x: x.get('名称', '').lower()) 
+
+        # 2. 提取分类内容
         for cat in UI_CATEGORIES:
             items = df[df['类型'] == cat].to_dict(orient='records')
-            if items: cat_data[cat] = items
+            if items: 
+                cat_data[cat] = items
+        
+        # 3. 对分类内部进行排序
         for cat in cat_data:
             cat_data[cat].sort(key=lambda x: x.get('名称', '').lower())
         return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
