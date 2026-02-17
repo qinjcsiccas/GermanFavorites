@@ -159,7 +159,10 @@
 
     <div class="space-y-4">
         {% for cat, items in cat_data.items() %}
-        <details class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" open>
+        {# 使用 slugify 确保 ID 格式标准，并移除默认的 open 属性使其初始折叠 #}
+        <details id="cat-{{ cat|slugify }}" 
+                 class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" 
+                 ontoggle="saveFoldStatus('cat-{{ cat|slugify }}')">
             <summary class="flex items-center justify-between p-4 font-bold text-gray-600 cursor-pointer list-none active:bg-gray-50 transition-colors">
                 <div class="flex items-center gap-2">
                     <span class="text-lg">📂 {{ cat }}</span>
@@ -179,7 +182,7 @@
                            class="star-btn {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
                             {{ '⭐' if item.标星 else '☆' }}
                         </a>
-
+    
                         <button onclick="openEditModal('{{ loop.index0 }}', '{{ item.名称 }}', '{{ item.网址 }}', '{{ item.类型 }}', '{{ item.备注 }}')" 
                                 class="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
                             ✏️
@@ -413,6 +416,36 @@
         function executeDelete() {
             document.getElementById('deleteForm').submit();
         }
+
+        // 1. 保存状态：当用户点击展开或折叠时触发
+        function saveFoldStatus(id) {
+            // 稍微延迟执行，确保获取的是点击后的状态
+            setTimeout(() => {
+                const el = document.getElementById(id);
+                const isOpen = el.hasAttribute('open');
+                localStorage.setItem(id, isOpen ? 'open' : 'closed');
+            }, 50);
+        }
+        
+        // 2. 还原状态：页面加载时自动运行
+        function restoreFoldStatus() {
+            const categories = document.querySelectorAll('details[id^="cat-"]');
+            categories.forEach(cat => {
+                const savedStatus = localStorage.getItem(cat.id);
+                
+                if (savedStatus === 'open') {
+                    cat.setAttribute('open', ''); // 恢复展开
+                } else if (savedStatus === 'closed') {
+                    cat.removeAttribute('open');  // 恢复折叠
+                } else {
+                    // 初始状态：如果没有记录，默认折叠
+                    cat.removeAttribute('open'); 
+                }
+            });
+        }
+        
+        // 页面加载完成后立即执行还原
+        document.addEventListener('DOMContentLoaded', restoreFoldStatus);
     </script>
         
     {% with messages = get_flashed_messages() %}
