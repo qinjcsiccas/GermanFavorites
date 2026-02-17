@@ -111,6 +111,9 @@
                     <a href="/export_csv" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2">
                         📥 导出收藏
                     </a>
+                    <button onclick="clearBrowseHistory()" class="w-full text-left px-4 py-3 text-sm text-amber-600 hover:bg-amber-50 flex items-center gap-2 border-t border-gray-50">
+                        ✨ 清空历史
+                    </button>
                     <a href="mailto:1419629781@qq.com?subject=德语资源库反馈&body=你好Jincheng，我想反馈：" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2 border-t border-gray-50">
                         📧 联系开发者
                     </a>
@@ -401,8 +404,29 @@
                 starPill.className = "w-1 h-3 bg-gray-300 rounded-full";
             }
         }
-        
-        
+
+        // 清空本地浏览历史记录
+        function clearBrowseHistory() {
+            // 使用原生确认框，因为这是在设置菜单内，App WebView 通常能正常显示这里的简单逻辑
+            if (confirm("碎影流光，尽归虚无？")) {
+                localStorage.removeItem('browse_history');
+                
+                // 如果当前正好在历史选项卡，清空后立即刷新显示
+                if (document.getElementById('content-history').style.display !== 'none') {
+                    renderHistory();
+                }
+                
+                // 隐藏设置菜单并显示提示
+                document.getElementById('settingsMenu').style.display = 'none';
+                
+                // 调用你现有的 Toast 提示功能（如果有）
+                if (typeof showToast === 'function') {
+                    showToast("碎影散尽，流光清寂 ✨");
+                } else {
+                    alert("历史记录已清空");
+                }
+            }
+        }
     </script>
 
     <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
