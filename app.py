@@ -17,8 +17,10 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "german_study_secure_2026")
 
 def slugify(text):
-    if not text: return "item" # 防止返回空值导致路由报错
-    return re.sub(r'[^\u4e00-\u9fa5a-zA-Z0-9]', '', str(text)).lower()
+    if not text: return "item"
+    # 增加对 unicode 字符的更广泛兼容
+    cleaned = re.sub(r'[^\w\u4e00-\u9fa5]', '', str(text))
+    return cleaned.lower() if cleaned else "item"
 
 app.jinja_env.filters['slugify'] = slugify
 
@@ -205,22 +207,27 @@ def change_password():
 def index():
     if 'user' not in session: return redirect(url_for('login'))
     
-    # 【必须放在 try 之前初始化】确保无论发生什么错误，except 块都有变量可用
+    # 【核心修复】预初始化，确保 except 块绝对安全
     starred = []
     cat_data = {}
     q = request.args.get('q', '').strip()
     
     try:
         sheet = get_user_sheet(session['user'])
-        # 增加安全检查：如果 sheet 对象没拿到，直接返回空内容
         if sheet is None:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
             
         records = sheet.get_all_records()
-        if not records:
+        # 【核心修复】增加对空记录的物理隔绝，防止 pandas 崩溃
+        if not records or len(records) == 0:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
         df = pd.DataFrame(records)
+        
+        # 再次检查列名是否存在
+        if df.empty or '名称' not in df.columns:
+            return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
+
         df.columns = [c.strip() for c in df.columns]
         df['备注'] = df['备注'].fillna('')
         df['标星'] = df['标星'].apply(lambda x: str(x).upper() in ['TRUE', '1', '是', 'YES'])
@@ -228,19 +235,23 @@ def index():
         if q: 
             df = df[df['名称'].str.contains(q, case=False)]
         
-        # 1. 提取标星并进行字母排序
+        # 1. 万象星选排序
         starred_df = df[df['标星']]
         starred = starred_df.to_dict(orient='records')
         starred.sort(key=lambda x: x.get('名称', '').lower()) 
 
-        # 2. 提取分类内容并进行内部排序
+        # 2. 板块内部排序
         for cat in UI_CATEGORIES:
             items = df[df['类型'] == cat].to_dict(orient='records')
             if items: 
-                # 板块内也按照名称字母排序
                 items.sort(key=lambda x: x.get('名称', '').lower())
                 cat_data[cat] = items
         
+        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
+    
+    except Exception as e:
+        # 最后的保底：将错误打印到 Vercel Logs
+        print(f"Index Logic Fatal Error: {str(e)}") 
         return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
     
     except Exception as e:
