@@ -205,14 +205,14 @@ def change_password():
 def index():
     if 'user' not in session: return redirect(url_for('login'))
     
-    # 【核心修复】：必须在 try 之外先初始化，确保 except 块永远能抓到这三个变量
+    # 【必须放在 try 之前初始化】确保无论发生什么错误，except 块都有变量可用
     starred = []
     cat_data = {}
     q = request.args.get('q', '').strip()
     
     try:
         sheet = get_user_sheet(session['user'])
-        # 增加安全检查：如果 sheet 对象没拿到，直接渲染空页面
+        # 增加安全检查：如果 sheet 对象没拿到，直接返回空内容
         if sheet is None:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
             
@@ -228,24 +228,25 @@ def index():
         if q: 
             df = df[df['名称'].str.contains(q, case=False)]
         
-        # 1. 提取标星并排序
+        # 1. 提取标星并进行字母排序
         starred_df = df[df['标星']]
         starred = starred_df.to_dict(orient='records')
         starred.sort(key=lambda x: x.get('名称', '').lower()) 
 
-        # 2. 提取分类内容并排序
+        # 2. 提取分类内容并进行内部排序
         for cat in UI_CATEGORIES:
             items = df[df['类型'] == cat].to_dict(orient='records')
             if items: 
+                # 板块内也按照名称字母排序
                 items.sort(key=lambda x: x.get('名称', '').lower())
                 cat_data[cat] = items
         
         return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
     
     except Exception as e:
-        # 这里现在是安全的，因为变量已在外部初始化
-        print(f"Index Error Captured: {str(e)}") 
-        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)    
+        # 这里现在是绝对安全的，因为变量已在外部初始化，且捕获了具体异常详情
+        print(f"Index Logic Error: {str(e)}") 
+        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)   
 
 @app.route('/logout')
 def logout():
