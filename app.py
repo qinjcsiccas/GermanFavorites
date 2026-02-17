@@ -17,8 +17,8 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "german_study_secure_2026")
 
 def slugify(text):
-    if not text: return ""
-    return re.sub(r'\W+', '', str(text)).lower()
+    if not text: return "item" # 防止返回空值导致路由报错
+    return re.sub(r'[^\u4e00-\u9fa5a-zA-Z0-9]', '', str(text)).lower()
 
 app.jinja_env.filters['slugify'] = slugify
 
