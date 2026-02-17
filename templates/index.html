@@ -368,7 +368,6 @@
             const container = document.getElementById('history-list');
             
             if (history.length === 0) {
-                // 这里的 py-4 已经与万象星选对齐
                 container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"> 碎影无踪，流光未铭 </div>';
                 return;
             }
@@ -379,10 +378,10 @@
                     <div class="res-row bg-white p-4 rounded-xl shadow-md border border-gray-100 transition-opacity duration-500" 
                          style="opacity: ${opacity};">
                         <a href="${item.url}" target="_blank" onclick="recordHistory('${item.name}', '${item.url}', '${item.note}')" class="flex-1 min-w-0 mr-4">
-                            <div class="font-bold text-gray-900 no-wrap text-base">${item.name}</div>
-                            <div class="text-xs text-gray-500 no-wrap opacity-80 mt-0.5">${item.note || '往日留痕'}</div>
+                            <div class="font-bold text-gray-900 no-wrap text-base leading-tight">${item.name}</div>
+                            <div class="text-xs text-gray-500 no-wrap opacity-80 leading-normal">${item.note || '往日留痕'}</div>
                         </a>
-                        <span class="text-xs text-gray-300 opacity-60">🕒</span>
+                        <div class="flex items-center justify-center w-9 h-9 opacity-40 text-sm">🕒</div>
                     </div>
                 `;
             }).join('');
