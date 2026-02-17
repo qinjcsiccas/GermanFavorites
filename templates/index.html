@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>德语资源库</title>
+    <title>德语星</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .no-wrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -139,13 +139,42 @@
 
     {% if starred %}
     <div class="mb-6">
-        <h3 class="text-[10px] font-bold text-amber-600 mb-2 uppercase tracking-widest flex items-center gap-1">
-            <span class="w-1 h-3 bg-amber-600 rounded-full"></span> 核心置顶
-        </h3>
+        
+        <div class="mb-4 flex items-center gap-4 px-1">
+        <button id="tab-starred" onclick="switchTab('starred')" 
+                class="text-[11px] font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1">
+            <span class="w-1 h-3 bg-amber-600 rounded-full"></span> 标星
+        </button>
+        <button id="tab-history" onclick="switchTab('history')" 
+                class="text-[11px] font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1">
+            <span class="w-1 h-3 bg-gray-300 rounded-full"></span> 足迹
+        </button>
+    </div>
+    
+    <div id="content-starred" class="mb-6 space-y-2">
+        {% if starred %}
+            {% for item in starred %}
+            <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
+                <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
+                    <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
+                    <div class="text-xs text-amber-700 no-wrap opacity-80">{{ item.备注 }}</div>
+                </a>
+                <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="text-3xl flex-shrink-0">⭐</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-4 text-xs text-gray-400 bg-gray-100/50 rounded-xl border border-dashed">暂无置顶资源</div>
+        {% endif %}
+    </div>
+    
+    <div id="content-history" class="mb-6 space-y-2" style="display: none;">
+        <div id="history-list" class="space-y-2">
+            </div>
+    </div>
         <div class="space-y-2">
             {% for item in starred %}
             <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
-                <a href="{{ item.网址 }}" target="_blank" class="flex-1 min-w-0 mr-4">
+                <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
                     <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
                     <div class="text-xs text-amber-700 no-wrap opacity-80">{{ item.备注 }}</div>
                 </a>
@@ -173,7 +202,7 @@
             <div class="px-4 pb-2 space-y-1">
                 {% for item in items %}
                 <div class="res-row py-3 border-b border-gray-50 last:border-0">
-                    <a href="{{ item.网址 }}" target="_blank" class="flex-1 min-w-0 mr-4">
+                    <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
                         <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
                         <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
                     </a>
@@ -310,6 +339,71 @@
             document.getElementById(id).style.display = 'flex';
             document.getElementById('settingsMenu').style.display = 'none';
         }
+
+        // 1. 记录历史：在用户点击任何资源链接时触发
+        function recordHistory(name, url, note) {
+            let history = JSON.parse(localStorage.getItem('browse_history') || '[]');
+            
+            // 移除已存在的同名记录，确保不重复
+            history = history.filter(item => item.url !== url);
+            
+            // 将新记录插入到最前面
+            history.unshift({ name, url, note, time: new Date().getTime() });
+            
+            // 只保留最近 10 条
+            if (history.length > 10) history.pop();
+            
+            localStorage.setItem('browse_history', JSON.stringify(history));
+        }
+        
+        // 2. 渲染历史列表
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('browse_history') || '[]');
+            const container = document.getElementById('history-list');
+            
+            if (history.length === 0) {
+                container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400 bg-gray-100/50 rounded-xl border border-dashed">尚无浏览记录</div>';
+                return;
+            }
+        
+            container.innerHTML = history.map(item => `
+                <div class="res-row bg-white p-4 rounded-xl shadow-sm border border-gray-100 opacity-90">
+                    <a href="${item.url}" target="_blank" onclick="recordHistory('${item.name}', '${item.url}', '${item.note}')" class="flex-1 min-w-0 mr-4">
+                        <div class="font-semibold text-gray-800 no-wrap">${item.name}</div>
+                        <div class="text-[10px] text-gray-400 no-wrap mt-0.5">${item.note || '刚刚浏览过'}</div>
+                    </a>
+                    <span class="text-xs text-gray-300">🕒</span>
+                </div>
+            `).join('');
+        }
+        
+        // 3. 切换选项卡逻辑
+        function switchTab(tab) {
+            const isStarred = tab === 'starred';
+            
+            // 切换内容显隐
+            document.getElementById('content-starred').style.display = isStarred ? 'block' : 'none';
+            document.getElementById('content-history').style.display = isStarred ? 'none' : 'block';
+            
+            // 切换按钮样式
+            const starBtn = document.getElementById('tab-starred');
+            const histBtn = document.getElementById('tab-history');
+            
+            if (isStarred) {
+                starBtn.classList.add('text-amber-600', 'border-amber-600');
+                starBtn.classList.remove('text-gray-400', 'border-transparent');
+                histBtn.classList.add('text-gray-400', 'border-transparent');
+                histBtn.classList.remove('text-amber-600', 'border-amber-600');
+            } else {
+                renderHistory(); // 切换到历史时重新渲染
+                histBtn.classList.add('text-amber-600', 'border-amber-600');
+                histBtn.classList.remove('text-gray-400', 'border-transparent');
+                starBtn.classList.add('text-gray-400', 'border-transparent');
+                starBtn.classList.remove('text-amber-600', 'border-amber-600');
+            }
+        }
+        
+        
     </script>
 
     <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
