@@ -134,6 +134,10 @@
                    placeholder="🔍 搜索资源、备注或分类..." 
                    class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white">
         </div>
+        <div id="search-empty" class="hidden text-center py-10">
+            <div class="text-3xl mb-3">🔭</div>
+            <p class="text-gray-400 text-sm italic">星海茫茫，未见此迹</p>
+        </div>        
         <button id="randomBtn" onclick="feelLucky()" 
                 class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50 transition-all duration-300">
             🎲
@@ -258,35 +262,44 @@
         // 升级版实时联想搜索
         function liveSearch(val) {
             const searchVal = val.toLowerCase().trim();
-            const categories = document.querySelectorAll('details'); // 获取所有文件夹
+            const categories = document.querySelectorAll('details');
+            const emptyState = document.getElementById('search-empty'); // 获取提示语容器
+            let totalVisibleItems = 0; // 计数器：记录总共匹配到了多少资源
         
             categories.forEach(cat => {
                 const catName = cat.querySelector('summary').innerText.toLowerCase();
-                const items = cat.querySelectorAll('.res-row'); // 获取该分类下的每一行资源
+                const items = cat.querySelectorAll('.res-row');
                 let hasVisibleItem = false;
         
                 items.forEach(item => {
                     const text = item.innerText.toLowerCase();
-                    // 匹配资源名、备注或者分类名
                     if (text.includes(searchVal) || catName.includes(searchVal)) {
                         item.style.display = 'flex';
                         hasVisibleItem = true;
+                        totalVisibleItems++; // 只要有一个匹配，计数器就加1
                     } else {
                         item.style.display = 'none';
                     }
                 });
         
-                // 智能交互：
+                // 智能交互逻辑
                 if (searchVal === "") {
                     cat.style.display = 'block';
-                    cat.open = true; // 清空搜索时保持展开（或者设为 false 默认折叠）
+                    cat.open = false; // 建议：清空搜索时默认折叠，保持页面整洁
                 } else if (hasVisibleItem) {
                     cat.style.display = 'block';
-                    cat.open = true;  // 命中搜索时自动展开文件夹
+                    cat.open = true;
                 } else {
-                    cat.style.display = 'none'; // 全都不匹配时隐藏整个文件夹
+                    cat.style.display = 'none';
                 }
             });
+        
+            // 判断是否显示“星海茫茫”提示
+            if (searchVal !== "" && totalVisibleItems === 0) {
+                emptyState.classList.remove('hidden'); // 显示提示
+            } else {
+                emptyState.classList.add('hidden'); // 隐藏提示
+            }
         }
 
         // 2. 打开编辑弹窗并自动填充数据
@@ -355,19 +368,24 @@
             const container = document.getElementById('history-list');
             
             if (history.length === 0) {
-                container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400 bg-gray-100/50 rounded-xl border border-dashed border-gray-200"> 碎影无踪，流光未铭 </div>';
+                container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400 bg-gray-100/50 rounded-xl border border-dashed"> 碎影无踪，流光未铭 </div>';
                 return;
             }
         
-            container.innerHTML = history.map(item => `
-                <div class="res-row bg-white p-4 rounded-xl shadow-sm border border-gray-100 opacity-90">
-                    <a href="${item.url}" target="_blank" onclick="recordHistory('${item.name}', '${item.url}', '${item.note}')" class="flex-1 min-w-0 mr-4">
-                        <div class="font-semibold text-gray-800 no-wrap">${item.name}</div>
-                        <div class="text-[10px] text-gray-400 no-wrap mt-0.5">${item.note || '刚刚浏览过'}</div>
-                    </a>
-                    <span class="text-xs text-gray-300">🕒</span>
-                </div>
-            `).join('');
+            container.innerHTML = history.map((item, index) => {
+                // 计算透明度：第一条 100%，之后每条递减 7%
+                const opacity = Math.max(0.3, 1 - (index * 0.07)); 
+                return `
+                    <div class="res-row bg-white p-4 rounded-xl shadow-sm border border-gray-100 transition-opacity duration-500" 
+                         style="opacity: ${opacity};">
+                        <a href="${item.url}" target="_blank" onclick="recordHistory('${item.name}', '${item.url}', '${item.note}')" class="flex-1 min-w-0 mr-4">
+                            <div class="font-semibold text-gray-800 no-wrap text-sm">${item.name}</div>
+                            <div class="text-[10px] text-gray-400 no-wrap mt-0.5">${item.note || '往日留痕'}</div>
+                        </a>
+                        <span class="text-[10px] text-gray-300">#${index + 1}</span>
+                    </div>
+                `;
+            }).join('');
         }
         
         // 3. 切换选项卡逻辑
