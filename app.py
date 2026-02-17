@@ -286,3 +286,25 @@ def export_csv():
     except Exception as e:
         flash(f"导出失败: {e}")
         return redirect(url_for('index'))
+
+@app.route('/delete_resource', methods=['POST'])
+def delete_resource():
+    if 'user' not in session: return redirect(url_for('login'))
+    
+    name_to_delete = request.form.get('name')
+    url_to_delete = request.form.get('url')
+
+    try:
+        user_ws = get_user_sheet(session['user'])
+        records = user_ws.get_all_records()
+        
+        # 寻找匹配的行（Google Sheets 索引从1开始，且有标题行，故 +2）
+        for i, row in enumerate(records):
+            if str(row.get('名称')) == name_to_delete and str(row.get('网址')) == url_to_delete:
+                user_ws.delete_rows(i + 2)
+                flash(f"已成功删除资源：{name_to_delete} 🗑️")
+                break
+    except Exception as e:
+        flash(f"删除失败: {str(e)}")
+        
+    return redirect(url_for('index'))
