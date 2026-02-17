@@ -393,6 +393,20 @@
                 setTimeout(() => toast.remove(), 500);
             }, 2200);
         }
+
+        // 删除资源二次确认
+        function confirmDelete() {
+        const name = document.getElementById('edit_name').value;
+        const url = document.getElementById('edit_url').value;
+    
+        if (confirm(`确定要永久删除资源 "${name}" 吗？此操作不可撤销。`)) {
+            // 将当前编辑框的数据同步到删除表单
+            document.getElementById('delete_name').value = name;
+            document.getElementById('delete_url').value = url;
+            // 提交删除表单
+            document.getElementById('deleteForm').submit();
+        }
+    }
     </script>
         
     {% with messages = get_flashed_messages() %}
@@ -430,11 +444,25 @@
                     {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
                 </select>
                 <textarea name="note" id="edit_note" class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none" rows="2"></textarea>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm">取消</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg">保存修改</button>
+                <div class="flex flex-col gap-2 pt-2">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+                        保存修改
+                    </button>
+                
+                    <div class="flex gap-2">
+                        <button type="button" onclick="confirmDelete()" 
+                                class="flex-1 bg-red-50 text-red-500 py-3 rounded-2xl text-sm font-bold border border-red-100 active:bg-red-100 transition-colors">
+                            🗑️ 删除资源
+                        </button>
+                        <button type="button" onclick="document.getElementById('editModal').style.display='none'" 
+                                class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm">取消</button>
+                    </div>
                 </div>
-            </form>
+                
+                <form id="deleteForm" action="/delete_resource" method="post" style="display:none;">
+                    <input type="hidden" name="name" id="delete_name">
+                    <input type="hidden" name="url" id="delete_url">
+                </form>
         </div>
     </div>
 </body>
