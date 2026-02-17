@@ -205,22 +205,21 @@ def change_password():
 def index():
     if 'user' not in session: return redirect(url_for('login'))
     
-    # 【核心修复 1】：在 try 之外预先初始化所有变量，确保 except 块永远能访问到它们
+    # 预设初始值，防止 except 块崩溃
     starred = []
     cat_data = {}
     q = request.args.get('q', '').strip()
     
     try:
-        sheet = get_user_sheet(session['user'])
-        # 如果 sheet 为空，提前跳出进入渲染
-        if not sheet:
-            return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
+        user_ws = get_user_sheet(session['user'])
+        if not user_ws:
+            return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
-        records = sheet.get_all_records()
-        if not records:
-            return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
+        all_records = user_ws.get_all_records()
+        if not all_records:
+            return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
-        df = pd.DataFrame(records)
+        df = pd.DataFrame(all_records)
         df.columns = [c.strip() for c in df.columns]
         df['备注'] = df['备注'].fillna('')
         df['标星'] = df['标星'].apply(lambda x: str(x).upper() in ['TRUE', '1', '是', 'YES'])
@@ -228,26 +227,24 @@ def index():
         if q: 
             df = df[df['名称'].str.contains(q, case=False)]
         
-        # 1. 提取标星并排序
+        # 1. 提取并排序万象星选
         starred_df = df[df['标星']]
         starred = starred_df.to_dict(orient='records')
         starred.sort(key=lambda x: x.get('名称', '').lower()) 
 
-        # 2. 提取分类内容并排序
+        # 2. 提取并排序分类内容
         for cat in UI_CATEGORIES:
             items = df[df['类型'] == cat].to_dict(orient='records')
             if items: 
-                # 【核心修复 2】：确保每个分类内部也按名称排序
-                items.sort(key=lambda x: x.get('名称', '').lower())
+                items.sort(key=lambda x: x.get('名称', '').lower()) # 字母排序
                 cat_data[cat] = items
         
         return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
     
     except Exception as e:
-        # 在服务器日志记录错误详情，方便你排查是不是 Google API 欠费或断网
-        print(f"CRITICAL INDEX ERROR: {str(e)}")
-        # 此时 starred 和 cat_data 已经是初始化的空值，不会再报错
-        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
+        # 如果是因为 pandas 或 gspread 报错，捕获它并返回空页面，而不是 500
+        print(f"Index Error Captured: {str(e)}")
+        return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
 @app.route('/logout')
 def logout():
