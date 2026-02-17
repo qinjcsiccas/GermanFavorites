@@ -207,57 +207,54 @@ def change_password():
 def index():
     if 'user' not in session: return redirect(url_for('login'))
     
-    # 【核心修复】预初始化，确保 except 块绝对安全
+    # 1. 预定义变量，确保安全性
     starred = []
     cat_data = {}
-    q = request.args.get('q', '').strip()
+    q = request.args.get('q', '').strip().lower()
     
     try:
         sheet = get_user_sheet(session['user'])
-        if sheet is None:
+        if not sheet:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
             
+        # 获取所有原始数据
         records = sheet.get_all_records()
-        # 【核心修复】增加对空记录的物理隔绝，防止 pandas 崩溃
-        if not records or len(records) == 0:
+        if not records:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
-        df = pd.DataFrame(records)
-        
-        # 再次检查列名是否存在
-        if df.empty or '名称' not in df.columns:
-            return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
+        # 2. 替代 pandas 的清洗与过滤逻辑
+        filtered_records = []
+        for r in records:
+            # 清理键名空格
+            cleaned_r = {str(k).strip(): v for k, v in r.items()}
+            # 统一处理标星逻辑
+            is_starred = str(cleaned_r.get('标星', '')).upper() in ['TRUE', '1', '是', 'YES']
+            cleaned_r['标星'] = is_starred
+            cleaned_r['备注'] = cleaned_r.get('备注', '') or ''
+            
+            # 搜索过滤
+            if q:
+                if q in str(cleaned_r.get('名称', '')).lower() or q in str(cleaned_r.get('备注', '')).lower():
+                    filtered_records.append(cleaned_r)
+            else:
+                filtered_records.append(cleaned_r)
 
-        df.columns = [c.strip() for c in df.columns]
-        df['备注'] = df['备注'].fillna('')
-        df['标星'] = df['标星'].apply(lambda x: str(x).upper() in ['TRUE', '1', '是', 'YES'])
-        
-        if q: 
-            df = df[df['名称'].str.contains(q, case=False)]
-        
-        # 1. 万象星选排序
-        starred_df = df[df['标星']]
-        starred = starred_df.to_dict(orient='records')
-        starred.sort(key=lambda x: x.get('名称', '').lower()) 
+        # 3. 提取并排序“万象星选”
+        starred = [r for r in filtered_records if r['标星']]
+        starred.sort(key=lambda x: str(x.get('名称', '')).lower())
 
-        # 2. 板块内部排序
+        # 4. 提取并排序分类内容
         for cat in UI_CATEGORIES:
-            items = df[df['类型'] == cat].to_dict(orient='records')
-            if items: 
-                items.sort(key=lambda x: x.get('名称', '').lower())
+            items = [r for r in filtered_records if r.get('类型') == cat]
+            if items:
+                items.sort(key=lambda x: str(x.get('名称', '')).lower())
                 cat_data[cat] = items
         
         return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
     
     except Exception as e:
-        # 最后的保底：将错误打印到 Vercel Logs
         print(f"Index Logic Fatal Error: {str(e)}") 
-        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
-    
-    except Exception as e:
-        # 这里现在是绝对安全的，因为变量已在外部初始化，且捕获了具体异常详情
-        print(f"Index Logic Error: {str(e)}") 
-        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)   
+        return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
 @app.route('/logout')
 def logout():
