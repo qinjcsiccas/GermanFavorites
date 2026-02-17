@@ -165,7 +165,7 @@
                         <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
                         <div class="text-xs text-amber-700 no-wrap opacity-80">{{ item.备注 }}</div>
                     </a>
-                    <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="text-3xl flex-shrink-0">⭐</a>
+                    <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="w-9 h-9 flex items-center justify-center text-3xl flex-shrink-0">⭐</a>
                 </div>
                 {% endfor %}
             {% else %}
@@ -381,7 +381,7 @@
                             <div class="font-bold text-gray-900 no-wrap text-base leading-tight">${item.name}</div>
                             <div class="text-xs text-gray-500 no-wrap opacity-80 leading-normal">${item.note || '往日留痕'}</div>
                         </a>
-                        <div class="flex items-center justify-center w-9 h-9 opacity-40 text-sm">🕒</div>
+                        <div class="w-9 h-9 flex items-center justify-center text-sm opacity-40">🕒</div>
                     </div>
                 `;
             }).join('');
