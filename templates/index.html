@@ -258,34 +258,58 @@
     </div>
     
     <script>
-    // 1. 实时搜索：让 details 标签根据输入隐藏/显示
+        // 1. 实时搜索：让 details 标签根据输入隐藏/显示
         // 升级版实时联想搜索
         function liveSearch(val) {
             const searchVal = val.toLowerCase().trim();
-            const categories = document.querySelectorAll('details');
-            const emptyState = document.getElementById('search-empty'); // 获取提示语容器
-            let totalVisibleItems = 0; // 计数器：记录总共匹配到了多少资源
+            const categories = document.querySelectorAll('details[id^="cat-"]');
+            const starredRows = document.querySelectorAll('#content-starred .res-row');
+            const emptyState = document.getElementById('search-empty');
+            const starredSection = document.getElementById('content-starred');
+            
+            let totalVisibleItems = 0;
         
+            // --- 1. 处理万象星选区域 ---
+            let visibleStars = 0;
+            starredRows.forEach(row => {
+                // 抓取名称和备注文本
+                const text = row.innerText.toLowerCase();
+                if (text.includes(searchVal)) {
+                    row.style.display = 'flex';
+                    visibleStars++;
+                    totalVisibleItems++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        
+            // 如果星选区一个匹配都没有，隐藏整个星选容器（可选，保持整洁）
+            if (searchVal !== "" && visibleStars === 0) {
+                // 这里的逻辑可以根据喜好调整，建议保留容器结构但隐藏内部行
+            }
+        
+            // --- 2. 处理分类列表区域 ---
             categories.forEach(cat => {
-                const catName = cat.querySelector('summary').innerText.toLowerCase();
                 const items = cat.querySelectorAll('.res-row');
                 let hasVisibleItem = false;
         
                 items.forEach(item => {
                     const text = item.innerText.toLowerCase();
-                    if (text.includes(searchVal) || catName.includes(searchVal)) {
+                    if (text.includes(searchVal)) {
                         item.style.display = 'flex';
                         hasVisibleItem = true;
-                        totalVisibleItems++; // 只要有一个匹配，计数器就加1
+                        totalVisibleItems++;
                     } else {
                         item.style.display = 'none';
                     }
                 });
         
-                // 智能交互逻辑
+                // 搜索时自动展开有结果的分类，清空时恢复折叠
                 if (searchVal === "") {
                     cat.style.display = 'block';
-                    cat.open = false; // 建议：清空搜索时默认折叠，保持页面整洁
+                    // 恢复用户之前的折叠状态
+                    const savedStatus = localStorage.getItem(cat.id);
+                    cat.open = (savedStatus === 'open');
                 } else if (hasVisibleItem) {
                     cat.style.display = 'block';
                     cat.open = true;
@@ -294,11 +318,11 @@
                 }
             });
         
-            // 判断是否显示“星海茫茫”提示
+            // --- 3. 精确控制“未见此迹”提示 ---
             if (searchVal !== "" && totalVisibleItems === 0) {
-                emptyState.classList.remove('hidden'); // 显示提示
+                emptyState.classList.remove('hidden');
             } else {
-                emptyState.classList.add('hidden'); // 隐藏提示
+                emptyState.classList.add('hidden');
             }
         }
 
