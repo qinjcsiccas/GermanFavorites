@@ -625,7 +625,8 @@
             <form action="/edit_resource" method="post" class="space-y-3">
                 <input type="hidden" name="index" id="edit_index">
                 <input type="text" name="name" id="edit_name" required class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                <input type="text" name="url" id="edit_url" required class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                <input type="text" name="url" id="edit_url" placeholder="网址必须以 https:// 或 http:// 开头" required 
+                    class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">                
                 <select name="type" id="edit_type" class="w-full border border-gray-100 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-blue-400">
                     {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
                 </select>
