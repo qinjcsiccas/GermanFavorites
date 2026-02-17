@@ -174,25 +174,6 @@
     </div>
 
     <hr class="mb-6 border-gray-200">
-    
-    <div id="content-history" class="mb-6 space-y-2" style="display: none;">
-        <div id="history-list" class="space-y-2">
-            </div>
-    </div>
-        <div class="space-y-2">
-            {% for item in starred %}
-            <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
-                <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
-                    <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
-                    <div class="text-xs text-amber-700 no-wrap opacity-80">{{ item.备注 }}</div>
-                </a>
-                <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="text-3xl flex-shrink-0">⭐</a>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    <hr class="mb-6 border-gray-200">
-    {% endif %}
 
     <div class="space-y-4">
         {% for cat, items in cat_data.items() %}
