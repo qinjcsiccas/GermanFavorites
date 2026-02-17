@@ -141,12 +141,12 @@
         <div class="mb-4 flex items-center gap-4 px-1">
             <button id="tab-starred" onclick="switchTab('starred')" 
                     class="text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1">
-                <span class="w-1 h-3 bg-amber-600 rounded-full"></span> 万象星选
+                <span id="pill-starred" class="w-1 h-3 bg-amber-600 rounded-full"></span> 万象星选
             </button>
             
             <button id="tab-history" onclick="switchTab('history')" 
                     class="text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1">
-                <span class="w-1 h-3 bg-gray-300 rounded-full"></span> 流光碎影
+                <span id="pill-history" class="w-1 h-3 bg-gray-300 rounded-full"></span> 流光碎影
             </button>
         </div>
         
@@ -371,25 +371,34 @@
         function switchTab(tab) {
             const isStarred = tab === 'starred';
             
-            // 切换内容显隐
+            // 1. 切换内容显隐
             document.getElementById('content-starred').style.display = isStarred ? 'block' : 'none';
             document.getElementById('content-history').style.display = isStarred ? 'none' : 'block';
             
-            // 切换按钮样式
+            // 2. 获取所有相关的元素
             const starBtn = document.getElementById('tab-starred');
             const histBtn = document.getElementById('tab-history');
+            const starPill = document.getElementById('pill-starred');
+            const histPill = document.getElementById('pill-history');
             
             if (isStarred) {
-                starBtn.classList.add('text-amber-600', 'border-amber-600');
-                starBtn.classList.remove('text-gray-400', 'border-transparent');
-                histBtn.classList.add('text-gray-400', 'border-transparent');
-                histBtn.classList.remove('text-amber-600', 'border-amber-600');
+                // 激活“万象星选”时的颜色切换
+                starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
+                histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+                
+                // 更新小柱子颜色
+                starPill.className = "w-1 h-3 bg-amber-600 rounded-full";
+                histPill.className = "w-1 h-3 bg-gray-300 rounded-full";
             } else {
                 renderHistory(); // 切换到历史时重新渲染
-                histBtn.classList.add('text-amber-600', 'border-amber-600');
-                histBtn.classList.remove('text-gray-400', 'border-transparent');
-                starBtn.classList.add('text-gray-400', 'border-transparent');
-                starBtn.classList.remove('text-amber-600', 'border-amber-600');
+                
+                // 激活“流光碎影”时的颜色切换
+                histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
+                starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+                
+                // 更新小柱子颜色
+                histPill.className = "w-1 h-3 bg-amber-600 rounded-full";
+                starPill.className = "w-1 h-3 bg-gray-300 rounded-full";
             }
         }
         
