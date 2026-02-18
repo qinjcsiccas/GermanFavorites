@@ -319,7 +319,12 @@
                     <!-- 今日学习卡片 -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-50">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs text-gray-400">📅 今日学习</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-400">📅 今日学习</span>
+                                <button onclick="showTargetSetting()" class="text-[10px] text-blue-400 hover:text-blue-600 transition-colors">
+                                    ✏️ 设置目标
+                                </button>
+                            </div>
                             <span class="text-[10px] text-gray-300" id="today-date"></span>
                         </div>
                         <div class="flex items-end justify-between">
@@ -327,7 +332,7 @@
                                 <span class="text-3xl font-bold text-blue-600" id="today-count">0</span>
                                 <span class="text-xs text-gray-400 ml-1">次</span>
                             </div>
-                            <div class="text-xs text-gray-400">目标 <span id="today-target">5</span></div>
+                            <div class="text-xs text-gray-400">目标 <span id="today-target" class="font-bold text-blue-500">5</span></div>
                         </div>
                         <div class="w-full h-2 bg-gray-100 rounded-full mt-3">
                             <div class="h-full bg-blue-600 rounded-full transition-all duration-500" id="today-progress" style="width: 0%"></div>
@@ -397,7 +402,7 @@
                             <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
                             <div class="text-xs text-gray-500 no-wrap mt-0.5 leading-normal">{{ item.备注 }}</div>
                         </a>
-                        <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="w-9 h-9 flex items-center justify-center text-2xl flex-shrink-0">⭐</a>
+                        <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this); recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="w-9 h-9 flex items-center justify-center text-2xl flex-shrink-0">⭐</a>
                     </div>
                     {% endfor %}
                 {% else %}
@@ -435,13 +440,12 @@
                             <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
                             <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
                         </a>
-                        <div class="flex items-center gap-1"> <!-- ← 这是控制右侧按钮的容器 -->
-                            <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" 
+                        <div class="flex items-center gap-1">
+                            <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this); recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" 
                                class="star-btn {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
                                 {{ '⭐' if item.标星 else '☆' }}
                             </a>
-                    
-                            <button onclick="openEditModal('{{ loop.index0 }}', '{{ item.名称 }}', '{{ item.网址 }}', '{{ item.类型 }}', '{{ item.备注 }}')" 
+                            <button onclick="openEditModal('{{ loop.index0 }}', '{{ item.名称 }}', '{{ item.网址 }}', '{{ item.类型 }}', '{{ item.备注 }}'); recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" 
                                     class="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
                                 ✏️
                             </button>
@@ -486,6 +490,36 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- 设置学习目标模态框 -->
+        <div id="targetModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[400]">
+            <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
+                <div class="text-center mb-4">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">🎯</div>
+                    <h3 class="font-bold text-gray-800">设置每日学习目标</h3>
+                    <p class="text-xs text-gray-400 mt-1">每天学习多少个资源？</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-center gap-4">
+                        <button onclick="adjustTarget(-1)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 text-xl hover:bg-gray-200 transition-colors">−</button>
+                        <span id="targetValue" class="text-3xl font-bold text-blue-600 w-16 text-center">5</span>
+                        <button onclick="adjustTarget(1)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 text-xl hover:bg-gray-200 transition-colors">+</button>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button onclick="document.getElementById('targetModal').style.display='none'" 
+                                class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm font-medium">
+                            取消
+                        </button>
+                        <button onclick="saveTarget()" 
+                                class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+                            保存设置
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -983,8 +1017,9 @@
                 
                 // 今日学习
                 const todayVisits = stats.lastVisitDate === todayStr ? stats.todayVisits : 0;
-                const target = 5; // 目标次数
+                const target = getLearningTarget(); // 从 localStorage 获取目标
                 const percent = Math.min(Math.round((todayVisits / target) * 100), 100);
+                document.getElementById('today-target').textContent = target; // 添加这行显示目标
                 
                 document.getElementById('today-count').textContent = todayVisits;
                 document.getElementById('today-progress').style.width = percent + '%';
@@ -1006,6 +1041,49 @@
                     for (let i = starCount; i < 5; i++) {
                         streakStars.innerHTML += '<span class="text-gray-200 text-xs">☆</span>';
                     }
+                }
+
+
+                // ========== 学习目标设置相关函数 ==========
+                // 获取当前学习目标
+                function getLearningTarget() {
+                    let target = localStorage.getItem('daily_target');
+                    if (!target) {
+                        target = 5; // 默认5次
+                        localStorage.setItem('daily_target', target);
+                    }
+                    return parseInt(target);
+                }
+                
+                // 显示设置模态框
+                function showTargetSetting() {
+                    const currentTarget = getLearningTarget();
+                    document.getElementById('targetValue').textContent = currentTarget;
+                    document.getElementById('targetModal').style.display = 'flex';
+                }
+                
+                // 调整目标值
+                function adjustTarget(delta) {
+                    const targetElement = document.getElementById('targetValue');
+                    let current = parseInt(targetElement.textContent);
+                    let newValue = current + delta;
+                    if (newValue >= 1 && newValue <= 50) { // 限制在1-50之间
+                        targetElement.textContent = newValue;
+                    }
+                }
+                
+                // 保存目标设置
+                function saveTarget() {
+                    const newTarget = parseInt(document.getElementById('targetValue').textContent);
+                    localStorage.setItem('daily_target', newTarget);
+                    document.getElementById('targetModal').style.display = 'none';
+                    
+                    // 刷新统计页面显示
+                    if (document.getElementById('content-stats').style.display !== 'none') {
+                        renderStats();
+                    }
+                    
+                    showToast(`每日目标已设为 ${newTarget} 次`, '🎯');
                 }
                 
                 // 提示语
