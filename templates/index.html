@@ -504,9 +504,7 @@
 
     <script>
         // 综合反馈：震动 + 沙漏动画
-        function triggerFeedback(el) {
-            localStorage.setItem('last_scroll_pos', window.scrollY); 
-            el.classList.add('vibrate');            
+        function triggerFeedback(el) {          
             el.classList.add('vibrate'); 
             setTimeout(() => {
                 el.innerHTML = '<span class="loading-spin">⏳</span>'; 
@@ -625,29 +623,40 @@
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // 1. 处理 Flash 消息
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. 处理 Flash 消息 (保持原样)
+            {% with messages = get_flashed_messages() %}
                 {% for message in messages %}
                     if (typeof showToast === 'function') {
                         let icon = "{{ message }}".includes("删除") ? "🗑️" : "✨";
                         showToast("{{ message }}", icon);
                     }
                 {% endfor %}
-    
-                // 2. 恢复位置逻辑（必须在 DOMContentLoaded 内部，且与 Flash 逻辑并列）
-                const savedScrollPos = localStorage.getItem('last_scroll_pos');
-                if (savedScrollPos) {
-                    // 延迟执行确保页面内容（特别是 details 展开状态）已渲染完毕
-                    setTimeout(() => {
-                        window.scrollTo({
-                            top: parseInt(savedScrollPos),
-                            behavior: 'smooth' 
-                        });
-                        // 只有在确定用户“回来”后才清除，或者保持一段时间
-                        localStorage.removeItem('last_scroll_pos');
-                    }, 150); // 稍微增加延迟，适配细节渲染
+            {% endwith %}
+        
+            // 2. 丝滑恢复位置核心逻辑
+            const savedScrollPos = localStorage.getItem('last_scroll_pos');
+            if (savedScrollPos) {
+                const targetPos = parseInt(savedScrollPos);
+                
+                // 技巧：先禁止浏览器的自动恢复行为
+                if ('scrollRestoration' in history) {
+                    history.scrollRestoration = 'manual';
                 }
-            });
+        
+                // 尝试立即跳转（如果 DOM 渲染够快）
+                window.scrollTo(0, targetPos);
+        
+                // 为了保险，在微小延迟后再强制确认一次，解决 details 展开导致的高度抖动
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: targetPos,
+                        behavior: 'auto' // 去掉 smooth，直接到位
+                    });
+                    localStorage.removeItem('last_scroll_pos');
+                }, 50); // 缩短到 50ms，肉眼几乎不可察觉
+            }
+        });
         </script>
       {% endif %}
     {% endwith %}
