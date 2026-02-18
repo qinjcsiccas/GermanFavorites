@@ -505,6 +505,8 @@
     <script>
         // 综合反馈：震动 + 沙漏动画
         function triggerFeedback(el) {
+            localStorage.setItem('last_scroll_pos', window.scrollY); 
+            el.classList.add('vibrate');            
             el.classList.add('vibrate'); 
             setTimeout(() => {
                 el.innerHTML = '<span class="loading-spin">⏳</span>'; 
@@ -624,45 +626,45 @@
       {% if messages %}
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                // 1. 处理 Flash 消息
                 {% for message in messages %}
                     if (typeof showToast === 'function') {
-                        // 如果消息包含“删除”，图标换成垃圾桶 🗑️，否则用星星 ✨
                         let icon = "{{ message }}".includes("删除") ? "🗑️" : "✨";
                         showToast("{{ message }}", icon);
                     }
                 {% endfor %}
-            }
-            const savedScrollPos = localStorage.getItem('last_scroll_pos');
+    
+                // 2. 恢复位置逻辑（必须在 DOMContentLoaded 内部，且与 Flash 逻辑并列）
+                const savedScrollPos = localStorage.getItem('last_scroll_pos');
                 if (savedScrollPos) {
-                    // 使用 window.scrollTo 恢复到记录的高度
-                    // 使用 setImmediate 或 setTimeout 确保在页面渲染完成后执行
+                    // 延迟执行确保页面内容（特别是 details 展开状态）已渲染完毕
                     setTimeout(() => {
                         window.scrollTo({
                             top: parseInt(savedScrollPos),
-                            behavior: 'smooth' // 使用平滑滚动，用户体验更好
+                            behavior: 'smooth' 
                         });
-                        // 恢复后建议清除掉，防止每次刷新页面都乱跳
+                        // 只有在确定用户“回来”后才清除，或者保持一段时间
                         localStorage.removeItem('last_scroll_pos');
-                    }, 100); 
+                    }, 150); // 稍微增加延迟，适配细节渲染
                 }
-            });                        
-                                     
+            });
         </script>
       {% endif %}
     {% endwith %}
-        </div>
-        
-        <script>
-            // 3秒后自动消失
-            setTimeout(() => {
-                const toast = document.getElementById('toast-container');
-                if(toast) {
-                    toast.style.opacity = '0';
-                    toast.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => toast.remove(), 500);
+    
+    <script>
+        if (!window.hasExecutedFlashScroll) { // 防止重复执行
+            document.addEventListener('DOMContentLoaded', function() {
+                const savedScrollPos = localStorage.getItem('last_scroll_pos');
+                if (savedScrollPos) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: parseInt(savedScrollPos), behavior: 'auto' }); // 恢复时建议用 auto 更快
+                        localStorage.removeItem('last_scroll_pos');
+                    }, 100);
                 }
-            }, 3000);
-        </script>
+            });
+        }
+    </script>
 
     <div id="editModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[300]">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl">
