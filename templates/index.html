@@ -25,31 +25,29 @@
             width: 100%;
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);
-            padding-top: max(12px, env(safe-area-inset-top));  /* 从8px增加到12px */
-            padding-bottom: 12px;  /* 从8px增加到12px，增加底部间距 */
+            padding-top: max(20px, env(safe-area-inset-top));  /* 增加到20px，让头部内容下移 */
+            padding-bottom: 8px;  /* 底部内边距保持较小 */
             background-color: #f9fafb;
             z-index: 100;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
             box-sizing: border-box;
         }
         
-        /* 新增：菜单容器定位 */
         .settings-menu-container {
             position: relative;
         }
         
-        /* 修改：菜单向下移动，避免被截断 */
         #settingsMenu {
             position: absolute;
             right: 0;
-            top: 45px;  /* 从原来的12px左右增加到45px，让菜单完全显示在头部下方 */
+            top: 38px;  /* 从齿轮正下方展开 */
             z-index: 9999;
         }
         
         .header-placeholder {
             width: 100%;
-            min-height: calc(44px + max(12px, env(safe-area-inset-top)) + 12px);  /* 8px改为12px */
-            margin-bottom: 16px;  /* 从12px增加到16px，增加与下面内容的间距 */
+            min-height: calc(44px + max(20px, env(safe-area-inset-top)));  /* 去掉额外的底部padding */
+            margin-bottom: 4px;  /* 从16px降到4px，减少与搜索框的间距 */
         }
         
         .progress-flag {
@@ -58,7 +56,7 @@
             height: 4px;
             display: flex;
             z-index: 99;
-            margin-top: 2px;  /* 添加微小间距，让装饰条和头部有一点呼吸感 */
+            margin-top: -2px;  /* 负边距，让它更贴近头部 */
         }
         .progress-flag > div {
             flex: 1 1 0;
@@ -181,7 +179,7 @@
     <!-- 占位块，防止内容被固定头部遮挡 -->
     <div class="header-placeholder"></div>
 
-    <div class="flex items-center gap-2 mb-6 h-10 mt-1">
+    <div class="flex items-center gap-2 mb-6 h-10 -mt-1">
         <button onclick="document.getElementById('addModal').style.display='flex'" 
                 class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100 transition-colors">
             ➕ 新增
