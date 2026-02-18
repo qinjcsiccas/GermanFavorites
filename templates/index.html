@@ -377,6 +377,7 @@
 
         // 1. 记录历史：在用户点击任何资源链接时触发
         function recordHistory(name, url, note) {
+            localStorage.setItem('last_scroll_pos', window.scrollY);
             let history = JSON.parse(localStorage.getItem('browse_history') || '[]');
             
             // 移除已存在的同名记录，确保不重复
@@ -630,7 +631,22 @@
                         showToast("{{ message }}", icon);
                     }
                 {% endfor %}
-            });
+            }
+            const savedScrollPos = localStorage.getItem('last_scroll_pos');
+                if (savedScrollPos) {
+                    // 使用 window.scrollTo 恢复到记录的高度
+                    // 使用 setImmediate 或 setTimeout 确保在页面渲染完成后执行
+                    setTimeout(() => {
+                        window.scrollTo({
+                            top: parseInt(savedScrollPos),
+                            behavior: 'smooth' // 使用平滑滚动，用户体验更好
+                        });
+                        // 恢复后建议清除掉，防止每次刷新页面都乱跳
+                        localStorage.removeItem('last_scroll_pos');
+                    }, 100); 
+                }
+            });                        
+                                     
         </script>
       {% endif %}
     {% endwith %}
