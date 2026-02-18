@@ -328,11 +328,16 @@
 
         // 2. 打开编辑弹窗并自动填充数据
         function openEditModal(idx, name, url, type, note) {
-            document.getElementById('edit_index').value = idx;
+            // 存入用于修改的新值框
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_url').value = url;
             document.getElementById('edit_type').value = type;
             document.getElementById('edit_note').value = note;
+        
+            // 存入用于后端定位的旧值隐藏域
+            document.getElementById('old_name').value = name;
+            document.getElementById('old_url').value = url;
+        
             document.getElementById('editModal').style.display = 'flex';
         }
 
@@ -648,6 +653,8 @@
             <h3 class="font-bold mb-4 text-gray-800 text-center">📝 修改资源信息</h3>
             
             <form action="/edit_resource" method="post" class="space-y-3">
+                <input type="hidden" name="old_name" id="old_name">
+                <input type="hidden" name="old_url" id="old_url">
                 <input type="hidden" name="index" id="edit_index">
                 <input type="text" name="name" id="edit_name" required class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
                 <input type="text" name="url" id="edit_url" placeholder="网址必须以 https:// 或 http:// 开头" required 
