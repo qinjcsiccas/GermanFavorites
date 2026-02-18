@@ -13,6 +13,44 @@ import csv
 from io import StringIO
 from flask import make_response
 
+# 简单的内存缓存
+cache = {}
+CACHE_TIMEOUT = 300  # 5分钟缓存
+
+def get_cached(key, timeout=CACHE_TIMEOUT):
+    """获取缓存数据"""
+    if key in cache:
+        data, timestamp = cache[key]
+        if time.time() - timestamp < timeout:
+            return data
+        else:
+            del cache[key]
+    return None
+
+def set_cached(key, data):
+    """设置缓存数据"""
+    cache[key] = (data, time.time())
+
+def clear_cache():
+    """清空缓存"""
+    cache.clear()
+
+# 错误处理装饰器
+def handle_errors(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except gspread.exceptions.APIError as e:
+            flash(f"Google Sheets 服务繁忙，请稍后重试")
+            return redirect(url_for('index'))
+        except Exception as e:
+            print(f"Error in {f.__name__}: {str(e)}")
+            flash(f"系统开小差了，请稍后再试")
+            return redirect(url_for('index'))
+    return decorated_function
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "german_study_secure_2026")
 
@@ -232,57 +270,67 @@ def change_password():
     return redirect(url_for('index'))
 
 @app.route('/')
+@handle_errors  # 添加错误处理装饰器
 def index():
     if 'user' not in session: return redirect(url_for('login'))
     
-    # 核心修复：预初始化空变量，彻底防止 except 块崩溃
     starred = []
     cat_data = {}
     q = request.args.get('q', '').strip().lower()
     
+    # 1. 尝试从缓存获取数据
+    cache_key = f"user_data_{session['user']}"
+    cached_data = get_cached(cache_key)
+    
+    # 2. 如果有缓存且没有搜索关键词，直接使用缓存数据
+    if cached_data and not q:
+        starred, cat_data = cached_data
+        print(f"使用缓存数据 for {session['user']}")  # 调试用，可以删除
+        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
+    
+    # 3. 没有缓存或正在搜索，从Google Sheets获取数据
     try:
         sheet = get_user_sheet(session['user'])
         if not sheet:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
             
-        # 使用原生列表处理，替代沉重的 pandas
         records = sheet.get_all_records()
         if not records:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
-        # 清洗与过滤逻辑
+        # 4. 数据处理（原有逻辑保持不变）
         all_items = []
         for r in records:
-            # 去除键名空格并处理空值
             item = {str(k).strip(): (v if v is not None else "") for k, v in r.items()}
-            
-            # 统一标星判断逻辑
             is_star = str(item.get('标星', '')).upper() in ['TRUE', '1', '是', 'YES']
             item['标星'] = is_star
             
-            # 执行搜索过滤
             if q:
                 if q in str(item.get('名称', '')).lower() or q in str(item.get('备注', '')).lower():
                     all_items.append(item)
             else:
                 all_items.append(item)
 
-        # 1. 提取并按字母排序“万象星选”
+        # 5. 处理星选资源
         starred = [i for i in all_items if i['标星']]
         starred.sort(key=lambda x: str(x.get('名称', '')).lower())
 
-        # 2. 按分类归纳并排序板块内容
+        # 6. 按分类整理
         for cat in UI_CATEGORIES:
             cat_list = [i for i in all_items if i.get('类型') == cat]
             if cat_list:
                 cat_list.sort(key=lambda x: str(x.get('名称', '')).lower())
                 cat_data[cat] = cat_list
         
+        # 7. 只有在没有搜索关键词时才缓存数据
+        if not q:
+            set_cached(cache_key, (starred, cat_data))
+        
         return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
     
     except Exception as e:
-        # 即使发生网络波动，也保证页面能正常渲染出空星海
         print(f"Server Logic Error: {str(e)}") 
+        # 8. 出错时返回空数据
         return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
 @app.route('/logout')
@@ -378,4 +426,13 @@ def delete_resource():
     except Exception as e:
         flash(f"删除失败: {str(e)}")
         
+    return redirect(url_for('index'))
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    flash('系统开小差了，请稍后再试')
     return redirect(url_for('index'))
