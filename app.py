@@ -157,27 +157,41 @@ def login():
 def edit_resource():
     if 'user' not in session: return redirect(url_for('login'))
     
-    # 获取原始行号（前端传来的索引）
+    # 获取前端传回的原始数据，用于匹配定位
+    old_name = request.form.get('old_name')
+    old_url = request.form.get('old_url')
+    
+    # 获取新数据
+    name = request.form.get('name', '').strip()
+    raw_url = request.form.get('url', '').strip()
+    if raw_url and not raw_url.startswith(('http://', 'https://')):
+        raw_url = 'https://' + raw_url
+    
+    updated_row = [
+        name,
+        raw_url,
+        request.form.get('type'),
+        request.form.get('note')
+    ]
+    
     try:
-        idx = int(request.form.get('index'))
-        
-        # --- 增加以下 4 行逻辑，用于补齐和清洗 ---
-        raw_url = request.form.get('url', '').strip()
-        if raw_url and not raw_url.startswith(('http://', 'https://')):
-            raw_url = 'https://' + raw_url
-        # ---------------------------------------
-
-        updated_row = [
-            request.form.get('name'),
-            raw_url,  # 这里改用处理后的 raw_url
-            request.form.get('type'),
-            request.form.get('note')
-        ]
-        
         user_ws = get_user_sheet(session['user'])
-        # Google Sheets 索引从1开始，表头占1行，所以是 idx + 2
-        user_ws.update(f'A{idx + 2}:D{idx + 2}', [updated_row])
-        flash("资源已更新 ✨")
+        records = user_ws.get_all_records()
+        
+        found = False
+        # 遍历所有行，寻找 名称 和 网址 同时匹配的行
+        for i, row in enumerate(records):
+            if str(row.get('名称')) == old_name and str(row.get('网址')) == old_url:
+                # 找到了原始行：i 是索引，+2 是 Sheet 实际行号
+                user_ws.update(f'A{i + 2}:D{i + 2}', [updated_row])
+                found = True
+                break
+        
+        if found:
+            flash("资源已原地更新 ✨")
+        else:
+            flash("未找到原始资源，无法修改 ⚠️")
+            
     except Exception as e:
         flash(f"更新失败: {str(e)}")
         
