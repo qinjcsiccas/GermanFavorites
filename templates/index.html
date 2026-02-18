@@ -33,7 +33,7 @@
             padding-left: max(16px, env(safe-area-inset-left));  /* 最小16px，确保不贴边 */
             padding-right: max(16px, env(safe-area-inset-right));  /* 最小16px，确保不贴边 */
             padding-top: max(20px, env(safe-area-inset-top));
-            padding-bottom: 8px;
+            padding-bottom: 24px !important;  /* 增加头部高度 */
             background-color: #f9fafb;
             z-index: 100;
             box-shadow: 0 1px 4px rgba(0,0,0,0.05);
@@ -54,7 +54,7 @@
         .header-placeholder {
             width: 100%;
             min-height: calc(70px + max(20px, env(safe-area-inset-top)));  /* 去掉额外的底部padding */
-            margin-bottom: 12px;  /* 从16px降到4px，减少与搜索框的间距 */
+            margin-bottom: 16px;  /* 从16px降到4px，减少与搜索框的间距 */
         }
         
         .progress-flag {
@@ -70,7 +70,7 @@
         }
         .progress-flag > div {
             flex: 0 1 90px;  /* 每个色块固定宽度90px，而不是平均分配 */
-            max-width: 90px;  /* 限制最大宽度 */
+            /* 限制最大宽度 max-width: 90px;   */
             height: 100%;
         }
         
@@ -185,7 +185,8 @@
         
         /* 搜索行上边距调整 */
         .flex.items-center.gap-2.mb-6.h-10 {
-            margin-top: -12px !important;  /* 从-3px改为-4px，进一步上移 */
+            margin-top: 8px !important;
+            position: relative;
             margin-bottom: 0.75rem !important;  /* 缩小底部间距 */
         }
         
