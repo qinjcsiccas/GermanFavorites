@@ -1043,49 +1043,6 @@
                     }
                 }
 
-
-                // ========== 学习目标设置相关函数 ==========
-                // 获取当前学习目标
-                function getLearningTarget() {
-                    let target = localStorage.getItem('daily_target');
-                    if (!target) {
-                        target = 5; // 默认5次
-                        localStorage.setItem('daily_target', target);
-                    }
-                    return parseInt(target);
-                }
-                
-                // 显示设置模态框
-                function showTargetSetting() {
-                    const currentTarget = getLearningTarget();
-                    document.getElementById('targetValue').textContent = currentTarget;
-                    document.getElementById('targetModal').style.display = 'flex';
-                }
-                
-                // 调整目标值
-                function adjustTarget(delta) {
-                    const targetElement = document.getElementById('targetValue');
-                    let current = parseInt(targetElement.textContent);
-                    let newValue = current + delta;
-                    if (newValue >= 1 && newValue <= 50) { // 限制在1-50之间
-                        targetElement.textContent = newValue;
-                    }
-                }
-                
-                // 保存目标设置
-                function saveTarget() {
-                    const newTarget = parseInt(document.getElementById('targetValue').textContent);
-                    localStorage.setItem('daily_target', newTarget);
-                    document.getElementById('targetModal').style.display = 'none';
-                    
-                    // 刷新统计页面显示
-                    if (document.getElementById('content-stats').style.display !== 'none') {
-                        renderStats();
-                    }
-                    
-                    showToast(`每日目标已设为 ${newTarget} 次`, '🎯');
-                }
-                
                 // 提示语
                 const streakMsg = document.getElementById('streak-message');
                 if (stats.streakDays === 0) {
@@ -1107,6 +1064,48 @@
                 
                 // 最常学习Top10
                 renderTopResources(stats);
+            }
+
+            // ========== 学习目标设置相关函数 ==========
+            // 获取当前学习目标
+            function getLearningTarget() {
+                let target = localStorage.getItem('daily_target');
+                if (!target) {
+                    target = 5; // 默认5次
+                    localStorage.setItem('daily_target', target);
+                }
+                return parseInt(target);
+            }
+            
+            // 显示设置模态框
+            function showTargetSetting() {
+                const currentTarget = getLearningTarget();
+                document.getElementById('targetValue').textContent = currentTarget;
+                document.getElementById('targetModal').style.display = 'flex';
+            }
+            
+            // 调整目标值
+            function adjustTarget(delta) {
+                const targetElement = document.getElementById('targetValue');
+                let current = parseInt(targetElement.textContent);
+                let newValue = current + delta;
+                if (newValue >= 1 && newValue <= 50) { // 限制在1-50之间
+                    targetElement.textContent = newValue;
+                }
+            }
+            
+            // 保存目标设置
+            function saveTarget() {
+                const newTarget = parseInt(document.getElementById('targetValue').textContent);
+                localStorage.setItem('daily_target', newTarget);
+                document.getElementById('targetModal').style.display = 'none';
+                
+                // 刷新统计页面显示
+                if (document.getElementById('content-stats').style.display !== 'none') {
+                    renderStats();
+                }
+                
+                showToast(`每日目标已设为 ${newTarget} 次`, '🎯');
             }
             
             // 渲染最常学习Top10
