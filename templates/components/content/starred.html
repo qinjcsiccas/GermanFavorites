@@ -1,0 +1,17 @@
+<div id="content-starred" class="space-y-2">
+    {% if starred %}
+        {% for item in starred %}
+        <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
+            <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
+                <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
+                <div class="text-xs text-gray-500 no-wrap mt-0.5 leading-normal">{{ item.备注 }}</div>
+            </a>
+            <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this); recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="w-9 h-9 flex items-center justify-center text-2xl flex-shrink-0">⭐</a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center py-4 text-xs text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+            星海广袤，愿君采撷
+        </div>
+    {% endif %}
+</div>

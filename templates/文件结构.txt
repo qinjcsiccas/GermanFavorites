@@ -1,0 +1,23 @@
+templates/
+├── base.html                          # 基础模板（头部、样式、主体结构）
+├── index.html                         # 主页面（只有 extends 语句）
+├── components/
+│   ├── header.html                    # 头部（德语星标题 + 设置菜单）
+│   ├── header_placeholder.html        # 占位块
+│   ├── search_bar.html                # 搜索框 + 新增按钮 + 骰子
+│   ├── search_empty.html               # 搜索无结果提示
+│   ├── tabs.html                      # 三个选项卡按钮
+│   ├── progress_flag.html             # 顶部进度条
+│   ├── content/
+│   │   ├── starred.html               # 万象星选内容
+│   │   ├── history.html               # 流光碎影内容
+│   │   └── stats.html                 # 星轨印记内容
+│   ├── modals/
+│   │   ├── add_modal.html             # 新增资源模态框
+│   │   ├── edit_modal.html            # 编辑资源模态框
+│   │   ├── password_modal.html        # 修改密码模态框
+│   │   ├── target_modal.html          # 设置目标模态框
+│   │   └── confirm_modals.html        # 删除/清空确认模态框
+│   └── scripts/
+│       ├── main_js.html               # 主要 JavaScript 函数
+│       └── additional_js.html         # 额外 JavaScript 函数

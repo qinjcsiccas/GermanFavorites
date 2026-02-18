@@ -1,0 +1,25 @@
+<div id="customConfirmModal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm items-center justify-center p-6 z-[400]">
+    <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in duration-200 text-center">
+        <div class="text-3xl mb-3">⚠️</div>
+        <h3 class="font-bold text-gray-800 text-lg mb-2">确认删除？</h3>
+        <p class="text-sm text-gray-500 mb-6">资源删除后将无法找回，确定要继续吗？</p>
+        
+        <div class="flex gap-3">
+            <button onclick="closeConfirm()" class="flex-1 bg-gray-100 text-gray-400 py-3 rounded-2xl text-sm font-medium">取消</button>
+            <button onclick="executeDelete()" class="flex-1 bg-red-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">确认删除</button>
+        </div>
+    </div>
+</div>
+
+<div id="clearHistoryModal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm items-center justify-center p-6 z-[400]">
+    <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in duration-200 text-center border border-amber-50">
+        <div class="text-3xl mb-3">✨</div>
+        <h3 class="font-bold text-gray-800 text-lg mb-2">碎影流光，相忘江湖？</h3>
+        <p class="text-sm text-gray-500 mb-6 px-2">确定要清空浏览历史吗？<br>此操作不可撤销。</p>
+        
+        <div class="flex gap-3">
+            <button onclick="closeClearModal()" class="flex-1 bg-gray-100 text-gray-400 py-3 rounded-2xl text-sm font-medium">暂且保留</button>
+            <button onclick="executeClearHistory()" class="flex-1 bg-amber-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">挥手作别</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,215 @@
+<script>
+    window.addEventListener('load', () => {
+        document.body.classList.add('loaded');
+    });
+    
+    function liveSearch(val) {
+        const searchVal = val.toLowerCase().trim();
+        const categories = document.querySelectorAll('details[id^="cat-"]');
+        const starredRows = document.querySelectorAll('#content-starred .res-row');
+        const emptyState = document.getElementById('search-empty');
+        
+        let totalVisibleItems = 0;
+    
+        let visibleStars = 0;
+        starredRows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(searchVal)) {
+                row.style.display = 'flex';
+                visibleStars++;
+                totalVisibleItems++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    
+        categories.forEach(cat => {
+            const items = cat.querySelectorAll('.res-row');
+            let hasVisibleItem = false;
+    
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                if (text.includes(searchVal)) {
+                    item.style.display = 'flex';
+                    hasVisibleItem = true;
+                    totalVisibleItems++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+    
+            if (searchVal === "") {
+                cat.style.display = 'block';
+                const savedStatus = localStorage.getItem(cat.id);
+                cat.open = (savedStatus === 'open');
+            } else if (hasVisibleItem) {
+                cat.style.display = 'block';
+                cat.open = true;
+            } else {
+                cat.style.display = 'none';
+            }
+        });
+    
+        if (searchVal !== "" && totalVisibleItems === 0) {
+            emptyState.classList.remove('hidden');
+            const mainContent = document.querySelector('.space-y-4');
+            if (mainContent) {
+                mainContent.style.marginTop = '30px';
+            }
+        } else {
+            emptyState.classList.add('hidden');
+            const mainContent = document.querySelector('.space-y-4');
+            if (mainContent) {
+                mainContent.style.marginTop = '';
+            }
+        }
+    }
+
+    function openEditModal(idx, name, url, type, note) {
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_url').value = url;
+        document.getElementById('edit_type').value = type;
+        document.getElementById('edit_note').value = note;
+    
+        document.getElementById('old_name').value = name;
+        document.getElementById('old_url').value = url;
+    
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            document.getElementById('skeleton-loader').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        }, 300);
+    });
+
+    function togglePw(id, btnId) {
+        const input = document.getElementById(id);
+        const btn = document.getElementById(btnId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerText = '🙉';
+        } else {
+            input.type = 'password';
+            btn.innerText = '🙈';
+        }
+    }
+
+    function toggleSettings() {
+        const menu = document.getElementById('settingsMenu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('settingsMenu');
+        const btn = e.target.closest('button');
+        if (!menu.contains(e.target) && (!btn || btn.innerText !== '⚙️')) {
+            menu.style.display = 'none';
+        }
+    });
+    
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+        document.getElementById('settingsMenu').style.display = 'none';
+    }
+
+    function recordHistory(name, url, note) {
+        recordResourceVisit(name, url, note);
+        localStorage.setItem('last_scroll_pos', window.scrollY);
+        let history = JSON.parse(localStorage.getItem('browse_history') || '[]');
+        
+        history = history.filter(item => item.url !== url);
+        
+        history.unshift({ name, url, note, time: new Date().getTime() });
+        
+        if (history.length > 10) history.pop();
+        
+        localStorage.setItem('browse_history', JSON.stringify(history));
+    }
+    
+    function renderHistory() {
+        const history = JSON.parse(localStorage.getItem('browse_history') || '[]');
+        const container = document.getElementById('history-list');
+        
+        if (history.length === 0) {
+            container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"> 碎影无踪，流光未铭 </div>';
+            return;
+        }
+    
+        container.innerHTML = history.map((item, index) => {
+            const opacity = Math.max(0.3, 1 - (index * 0.07)); 
+            return `
+            <div class="res-row bg-white p-4 rounded-xl shadow-md border border-gray-100 transition-opacity duration-500" 
+                 style="opacity: ${opacity};">
+                <a href="${item.url}" target="_blank" class="flex-1 min-w-0 mr-4">
+                    <div class="font-bold text-gray-900 no-wrap text-base">${item.name}</div>
+                    <div class="text-xs text-gray-500 no-wrap mt-0.5 leading-normal">${item.note || '往日留痕'}</div>
+                </a>
+                <div class="w-9 h-9 flex items-center justify-center text-xl opacity-40 flex-shrink-0">🕒</div>
+            </div>
+            `;
+        }).join('');
+    }
+    
+    function switchTab(tab) {
+        const isStarred = tab === 'starred';
+        const isHistory = tab === 'history';
+        const isStats = tab === 'stats';
+        
+        document.getElementById('content-starred').style.display = isStarred ? 'block' : 'none';
+        document.getElementById('content-history').style.display = isHistory ? 'block' : 'none';
+        document.getElementById('content-stats').style.display = isStats ? 'block' : 'none';
+        
+        const starBtn = document.getElementById('tab-starred');
+        const histBtn = document.getElementById('tab-history');
+        const statsBtn = document.getElementById('tab-stats');
+        const starPill = document.getElementById('pill-starred');
+        const histPill = document.getElementById('pill-history');
+        const statsPill = document.getElementById('pill-stats');
+        
+        starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+        histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+        statsBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+        
+        starPill.className = "w-1 h-3 bg-gray-300 rounded-full";
+        histPill.className = "w-1 h-3 bg-gray-300 rounded-full";
+        statsPill.className = "w-1 h-3 bg-gray-300 rounded-full";
+        
+        if (isStarred) {
+            starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
+            starPill.className = "w-1 h-3 bg-amber-600 rounded-full";
+        } else if (isHistory) {
+            renderHistory();
+            histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
+            histPill.className = "w-1 h-3 bg-amber-600 rounded-full";
+        } else if (isStats) {
+            renderStats();
+            statsBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
+            statsPill.className = "w-1 h-3 bg-amber-600 rounded-full";
+        }
+    }
+
+    function clearBrowseHistory() {
+        document.getElementById('settingsMenu').style.display = 'none';
+        document.getElementById('clearHistoryModal').style.display = 'flex';
+    }
+    
+    function closeClearModal() {
+        document.getElementById('clearHistoryModal').style.display = 'none';
+    }
+    
+    function executeClearHistory() {
+        localStorage.removeItem('browse_history');
+        
+        if (document.getElementById('content-history').style.display !== 'none') {
+            renderHistory();
+        }
+        
+        closeClearModal();
+        
+        if (typeof showToast === 'function') {
+            showToast("碎影散尽，流光清寂", "🧹"); 
+        }
+    }
+</script>

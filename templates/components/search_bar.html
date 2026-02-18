@@ -1,0 +1,15 @@
+<div class="flex items-center gap-2 mb-2 h-10" style="margin-top: 10px !important;">
+    <button onclick="document.getElementById('addModal').style.display='flex'" 
+            class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100 transition-colors">
+        ➕ 新增
+    </button>
+    <div class="flex-1 h-full">
+        <input type="text" id="liveSearchInput" oninput="liveSearch(this.value)" 
+               placeholder="🔍 搜索资源、备注或分类..." 
+               class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white">
+    </div>
+    <button id="randomBtn" onclick="feelLucky()" 
+            class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50 transition-all duration-300">
+        🎲
+    </button>
+</div>

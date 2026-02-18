@@ -1,0 +1,38 @@
+<div id="editModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[300]">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl">
+        <h3 class="font-bold mb-4 text-gray-800 text-center">📝 修改资源信息</h3>
+        
+        <form action="/edit_resource" method="post" class="space-y-3">
+            <input type="hidden" name="old_name" id="old_name">
+            <input type="hidden" name="old_url" id="old_url">
+            <input type="hidden" name="index" id="edit_index">
+            <input type="text" name="name" id="edit_name" required class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            <input type="text" name="url" id="edit_url" placeholder="网址必须以 https:// 或 http:// 开头" required 
+                class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">                
+            <select name="type" id="edit_type" class="w-full border border-gray-100 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-blue-400">
+                {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
+            </select>
+            <textarea name="note" id="edit_note" class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none" rows="2"></textarea>
+            
+            <div class="flex flex-col gap-2 pt-2">
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+                    保存修改
+                </button>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="confirmDelete()" 
+                            class="flex-1 bg-red-50 text-red-500 py-3 rounded-2xl text-sm font-bold border border-red-100 active:bg-red-100 transition-colors shadow-sm">
+                        🗑️ 删除资源
+                    </button>
+                    <button type="button" onclick="document.getElementById('editModal').style.display='none'" 
+                            class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm">取消</button>
+                </div>
+            </div>
+        </form>
+
+        <form id="deleteForm" action="/delete_resource" method="post" style="display:none;">
+            <input type="hidden" name="name" id="delete_name">
+            <input type="hidden" name="url" id="delete_url">
+        </form>
+    </div>
+</div>

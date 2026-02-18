@@ -1,0 +1,28 @@
+<div id="targetModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[400]">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
+        <div class="text-center mb-4">
+            <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">🎯</div>
+            <h3 class="font-bold text-gray-800">设置每日学习目标</h3>
+            <p class="text-xs text-gray-400 mt-1">每天学习多少个资源？</p>
+        </div>
+        
+        <div class="space-y-4">
+            <div class="flex items-center justify-center gap-4">
+                <button onclick="adjustTarget(-1)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 text-xl hover:bg-gray-200 transition-colors">−</button>
+                <span id="targetValue" class="text-3xl font-bold text-blue-600 w-16 text-center">5</span>
+                <button onclick="adjustTarget(1)" class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 text-xl hover:bg-gray-200 transition-colors">+</button>
+            </div>
+            
+            <div class="flex gap-3 pt-4">
+                <button onclick="document.getElementById('targetModal').style.display='none'" 
+                        class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm font-medium">
+                    取消
+                </button>
+                <button onclick="saveTarget()" 
+                        class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+                    保存设置
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

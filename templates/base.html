@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f9fafb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)"> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="msapplication-navbutton-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>德语星</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .no-wrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .res-row { display: flex; align-items: center; justify-content: space-between; min-height: 80px;}
+        summary::-webkit-details-marker { display: none; }
+        body { opacity: 0; transition: opacity 0.2s ease-in; padding-top: env(safe-area-inset-top);}
+        body.loaded { opacity: 1; }
+
+        .app-header {
+            position: fixed;
+            top: 3px;
+            left: 0;
+            width: 100%;
+            padding-left: max(16px, env(safe-area-inset-left));
+            padding-right: max(16px, env(safe-area-inset-right));
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: 24px !important;
+            background-color: #f9fafb;
+            z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        
+        .settings-menu-container {
+            position: relative;
+        }
+        
+        #settingsMenu {
+            position: absolute;
+            right: 0;
+            top: 38px;
+            z-index: 9999;
+        }
+
+        #search-empty {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        #search-empty:not(.hidden) + .space-y-4 {
+            margin-top: 1rem;
+        }
+        
+        .header-placeholder {
+            width: 100%;
+            min-height: calc(70px + max(20px, env(safe-area-inset-top)));
+            margin-bottom: 16px;
+        }
+        
+        .progress-flag {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 7px;
+            display: flex;
+            justify-content: center;
+            z-index: 9999;
+            margin-top: 0;
+        }
+        .progress-flag > div {
+            flex: 1;
+            max-width: none;
+            height: 100%;
+        }
+        
+        .star-empty {
+            color: #ffffff;
+            text-shadow: 1px 1px 0 #4B5563, -1px -1px 0 #4B5563, 1px -1px 0 #4B5563, -1px 1px 0 #4B5563;
+        }
+
+        .star-btn {
+            width: 36px;
+            height: 36px;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            font-size: 1.35rem;
+            transition: transform 0.1s ease;
+        }
+        
+        .star-empty {
+            color: #ffffff;
+            text-shadow: 1px 1px 0 #9CA3AF, -1px -1px 0 #9CA3AF, 1px -1px 0 #9CA3AF, -1px 1px 0 #9CA3AF;
+            display: inline-block;
+            transform: translateY(-1.5px);
+        }
+
+        .vibrate { animation: vibrate 0.2s linear; }
+        @keyframes vibrate {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .loading-spin { animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .dice-spin {
+            animation: dice-shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes dice-shake {
+            0% { transform: rotate(0deg) scale(1.1); }
+            25% { transform: rotate(90deg) scale(1.2); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            75% { transform: rotate(270deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        .dice-glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6 !important;
+        }
+
+        .res-row:active {
+            background-color: #f3f4f6;
+            transform: scale(0.98);
+            transition: all 0.1s ease;
+        }
+        
+        .bg-white.p-4.rounded-xl.shadow-md:active {
+            background-color: #fffbeb;
+            transform: scale(0.98);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .max-w-md {
+            max-width: 28rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 0.7rem !important;
+            padding-right: 0.7rem !important;
+        }
+        
+        .app-header .max-w-md {
+            padding-left: 0.7rem !important;
+            padding-right: 0.7rem !important;
+        }
+        
+        .app-header {
+            padding-left: max(12px, env(safe-area-inset-left)) !important;
+            padding-right: max(12px, env(safe-area-inset-right)) !important;
+            padding-top: max(16px, env(safe-area-inset-top)) !important;
+            padding-bottom: 4px !important;
+        }
+        
+        .header-placeholder {
+            min-height: calc(40px + max(16px, env(safe-area-inset-top))) !important;
+            margin-bottom: 2px !important;
+        }
+        
+        .flex.items-center.gap-2.mb-6.h-10 {
+            margin-top: 8px !important;
+            position: relative;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .space-y-4 {
+            margin-top: 0.5rem !important;
+        }
+        .space-y-4 > * + * {
+            margin-top: 0.5rem !important;
+        }
+        
+        .res-row {
+            padding: p-4(1rem);
+            min-height: 72px !important;
+        }      
+    </style>    
+</head>
+    
+<body class="bg-gray-50 min-h-screen pb-20">
+    {% include 'components/progress_flag.html' %}
+    
+    <main class="main-content max-w-md mx-auto p-4 md:px-0 pt-2">
+        <div id="skeleton-loader" class="space-y-4">
+            {% for i in range(5) %}
+            <div class="bg-white rounded-xl p-4 shadow-sm animate-pulse">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div class="h-4 bg-gray-100 rounded w-1/2"></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="w-9 h-9 bg-gray-200 rounded-full"></div>
+                        <div class="w-9 h-9 bg-gray-200 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% include 'components/header.html' %}
+        {% include 'components/header_placeholder.html' %}
+        {% include 'components/search_bar.html' %}
+        {% include 'components/search_empty.html' %}
+        
+        <div class="mb-6">
+            {% include 'components/tabs.html' %}
+            
+            {% include 'components/content/stats.html' %}
+            {% include 'components/content/starred.html' %}
+            {% include 'components/content/history.html' %}
+        </div>
+    
+        <hr class="mb-6 border-gray-200">
+    
+        <div class="space-y-4">
+            {% for cat, items in cat_data.items() %}
+            <details id="cat-{{ cat|slugify }}" 
+                     class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" 
+                     ontoggle="saveFoldStatus('cat-{{ cat|slugify }}')">
+                <summary class="flex items-center justify-between p-4 font-bold text-gray-600 cursor-pointer list-none active:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">📂 {{ cat }}</span>
+                        <span class="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full ml-1">{{ items|length }}</span>
+                    </div>
+                    <span class="text-gray-400 transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <div class="px-4 pb-2 space-y-1">
+                    {% for item in items %}
+                    <div class="res-row py-3 border-b border-gray-50 last:border-0">
+                        <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
+                            <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
+                            <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
+                        </a>
+                        <div class="flex items-center gap-1">
+                            <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this); recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" 
+                               class="star-btn {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
+                                {{ '⭐' if item.标星 else '☆' }}
+                            </a>
+                            <button onclick="openEditModal('{{ loop.index0 }}', '{{ item.名称 }}', '{{ item.网址 }}', '{{ item.类型 }}', '{{ item.备注 }}'); recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" 
+                                    class="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
+                                ✏️
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    
+        {% include 'components/modals/password_modal.html' %}
+        {% include 'components/modals/target_modal.html' %}
+        
+        {% include 'components/scripts/main_js.html' %}
+        
+        {% include 'components/modals/add_modal.html' %}
+        
+        {% include 'components/scripts/additional_js.html' %}
+        
+        {% include 'components/modals/edit_modal.html' %}
+        {% include 'components/modals/confirm_modals.html' %}
+    </main>
+</body>
+</html>
