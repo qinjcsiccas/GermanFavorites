@@ -5,8 +5,8 @@
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default"> 
-    <meta name="theme-color" content="#f9fafb">    
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> 
+    <meta name="theme-color" content="#1a1a1a">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>德语星</title>
@@ -138,7 +138,7 @@
     
 </head>
 <body class="bg-gray-50 min-h-screen pb-20">
-    <div class="progress-flag max-w-md mx-auto flex px-4 md:px-0">
+    <div class="progress-flag max-w-md mx-auto flex px-3 md:px-0">
         <div class="bg-black"></div>
         <div class="bg-[#FF0000]"></div>
         <div class="bg-[#FFCC00]"></div>
@@ -148,12 +148,12 @@
     <div class="max-w-md mx-auto p-4 md:px-0">
 
         <header class="app-header">
-            <div class="max-w-md mx-auto flex items-center justify-between px-4">
+            <div class="max-w-md mx-auto flex items-center justify-between px-3">
                 <h1 class="text-2xl font-bold flex items-center gap-2"><span>🇩🇪</span> 德语星 </h1>
                 <div class="settings-menu-container flex items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl border border-gray-100 shadow-sm backdrop-blur-sm relative z-50">
-                    <span class="text-[11px] text-gray-400 font-medium pl-1 pr-2">👤 {{ user }}</span>
+                    <span class="text-[11px] text-gray-400 font-medium pl-1 pr-1">👤 {{ user }}</span>
                     
-                    <button onclick="toggleSettings()" class="text-lg px-4 hover:bg-gray-100 rounded-xl transition-all">⚙️</button>
+                    <button onclick="toggleSettings()" class="text-lg px-2 hover:bg-gray-100 rounded-xl transition-all">⚙️</button>
                 
                     <div id="settingsMenu" style="display:none;" class="absolute right-0 w-36 bg-white rounded-2xl shadow-2xl border border-gray-50 z-[9999] py-2 animate-in slide-in-from-top-2 duration-200">
                     <button onclick="openModal('pwModal')" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2">
