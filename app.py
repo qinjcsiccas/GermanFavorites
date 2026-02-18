@@ -153,6 +153,10 @@ def add():
     sheet = get_user_sheet(session['user'])
     # 注意：这里存入 sheet 的 url 已经是补齐后的了
     sheet.append_row([name, url, request.form.get('type'), request.form.get('note').strip(), "FALSE"])
+    # 清空用户缓存
+    cache_key = f"user_data_{session['user']}"
+    if cache_key in cache:
+        del cache[cache_key]
     
     flash(f"手摘星辰，点亮{name[:4]} ") 
     return redirect(url_for('index'))
@@ -339,14 +343,29 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/toggle/<cid>')
+@handle_errors
 def toggle(cid):
+    if 'user' not in session: 
+        return redirect(url_for('login'))
+    
+    # 获取用户工作表
     s = get_user_sheet(session['user'])
     d = s.get_all_records()
+    
+    # 查找并更新标星状态
     for i, r in enumerate(d):
         if slugify(r.get('名称', '')) == cid:
             curr = str(r.get('标星', '')).upper() in ['TRUE', '1', '是', 'YES']
+            # 更新单元格
             s.update_cell(i + 2, 5, "TRUE" if not curr else "FALSE")
             break
+    
+    # 关键：清空该用户的缓存
+    cache_key = f"user_data_{session['user']}"
+    if cache_key in cache:
+        del cache[cache_key]
+        print(f"已清除缓存 for {session['user']}")  # 调试用
+    
     return redirect(url_for('index', q=request.args.get('q', '')))
 
 @app.route('/random')
