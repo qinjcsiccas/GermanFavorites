@@ -9,6 +9,8 @@
         .no-wrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .res-row { display: flex; align-items: center; justify-content: space-between; min-height: 80px;}
         summary::-webkit-details-marker { display: none; }
+        body { opacity: 0; transition: opacity 0.2s ease-in; }
+        body.loaded { opacity: 1; }
         
         /* 增强描边空心星星 */
         .star-empty {
@@ -258,6 +260,10 @@
     </div>
     
     <script>
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+        });
+        
         // 1. 实时搜索：让 details 标签根据输入隐藏/显示
         // 升级版实时联想搜索
         function liveSearch(val) {
