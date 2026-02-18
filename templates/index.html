@@ -50,6 +50,17 @@
             top: 38px;  /* 从齿轮正下方展开 */
             z-index: 9999;
         }
+
+        /* 搜索无结果时的提示样式 */
+        #search-empty {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        #search-empty:not(.hidden) + .space-y-4 {
+            margin-top: 1rem;
+        }
         
         .header-placeholder {
             width: 100%;
@@ -245,7 +256,7 @@
         <!-- 占位块，防止内容被固定头部遮挡 -->
         <div class="header-placeholder" style="min-height: 70px !important;"></div>
     
-        <div class="flex items-center gap-2 mb-6 h-10" style="margin-top: 10px !important;">
+        <div class="flex items-center gap-2 mb-2 h-10" style="margin-top: 10px !important;">
             <button onclick="document.getElementById('addModal').style.display='flex'" 
                     class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100 transition-colors">
                 ➕ 新增
@@ -255,10 +266,10 @@
                        placeholder="🔍 搜索资源、备注或分类..." 
                        class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white">
             </div>
-            <div id="search-empty" class="hidden text-center py-10">
-                <div class="text-3xl mb-3">🔭</div>
-                <p class="text-gray-400 text-sm italic">星海茫茫，未见此迹</p>
-            </div>        
+            <div id="search-empty" class="hidden text-center py-6">
+                <div class="text-3xl mb-2">🔭</div>
+                <p class="text-gray-400 text-sm">星海茫茫，未见此迹</p>
+            </div>
             <button id="randomBtn" onclick="feelLucky()" 
                     class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50 transition-all duration-300">
                 🎲
@@ -324,7 +335,7 @@
                             <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
                             <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
                         </a>
-                        <div class="flex items-center gap-1 mr-1"> <!-- ← 这是控制右侧按钮的容器 -->
+                        <div class="flex items-center gap-1"> <!-- ← 这是控制右侧按钮的容器 -->
                             <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" 
                                class="star-btn {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
                                 {{ '⭐' if item.标星 else '☆' }}
@@ -446,8 +457,17 @@
                 // --- 3. 精确控制“未见此迹”提示 ---
                 if (searchVal !== "" && totalVisibleItems === 0) {
                     emptyState.classList.remove('hidden');
+                    // 确保搜索结果区域有足够的空间显示提示
+                    const mainContent = document.querySelector('.space-y-4');
+                    if (mainContent) {
+                        mainContent.style.marginTop = '20px';
+                    }
                 } else {
                     emptyState.classList.add('hidden');
+                    const mainContent = document.querySelector('.space-y-4');
+                    if (mainContent) {
+                        mainContent.style.marginTop = ''; // 恢复默认
+                    }
                 }
             }
     
