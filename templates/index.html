@@ -266,14 +266,16 @@
                        placeholder="🔍 搜索资源、备注或分类..." 
                        class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white">
             </div>
-            <div id="search-empty" class="hidden text-center py-6">
-                <div class="text-3xl mb-2">🔭</div>
-                <p class="text-gray-400 text-sm">星海茫茫，未见此迹</p>
-            </div>
             <button id="randomBtn" onclick="feelLucky()" 
                     class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50 transition-all duration-300">
                 🎲
             </button>
+        </div>
+        
+        <!-- 望远镜提示 - 单独一行，在搜索框下方 -->
+        <div id="search-empty" class="hidden text-center py-6">
+            <div class="text-3xl mb-2">🔭</div>
+            <p class="text-gray-400 text-sm">星海茫茫，未见此迹</p>
         </div>
         
         <div class="mb-6">
@@ -460,7 +462,7 @@
                     // 确保搜索结果区域有足够的空间显示提示
                     const mainContent = document.querySelector('.space-y-4');
                     if (mainContent) {
-                        mainContent.style.marginTop = '20px';
+                        mainContent.style.marginTop = '30px';  // 增加上边距，为提示腾出空间
                     }
                 } else {
                     emptyState.classList.add('hidden');
