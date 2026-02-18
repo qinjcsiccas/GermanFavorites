@@ -286,7 +286,7 @@
                     class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50 transition-all duration-300">
                 🎲
             </button>
-        </div>
+        </div>        
         
         <!-- 望远镜提示 - 单独一行，在搜索框下方 -->
         <div id="search-empty" class="hidden text-center py-6">
@@ -305,6 +305,88 @@
                         class="text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1">
                     <span id="pill-history" class="w-1 h-3 bg-gray-300 rounded-full"></span> 流光碎影
                 </button>
+                
+                <button id="tab-stats" onclick="switchTab('stats')" 
+                        class="text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1">
+                    <span id="pill-stats" class="w-1 h-3 bg-gray-300 rounded-full"></span> 星轨印记
+                </button>
+            </div>
+
+            <!-- 星轨印记 - 学习统计 -->
+            <div id="content-stats" class="space-y-3" style="display: none;">
+                <!-- 第一行：今日学习 + 连续学习（两个卡片并排） -->
+                <div class="grid grid-cols-2 gap-3 mb-1">
+                    <!-- 今日学习卡片 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-50">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs text-gray-400">📅 今日学习</span>
+                            <span class="text-[10px] text-gray-300" id="today-date"></span>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <span class="text-3xl font-bold text-blue-600" id="today-count">0</span>
+                                <span class="text-xs text-gray-400 ml-1">次</span>
+                            </div>
+                            <div class="text-xs text-gray-400">目标 <span id="today-target">5</span></div>
+                        </div>
+                        <div class="w-full h-2 bg-gray-100 rounded-full mt-3">
+                            <div class="h-full bg-blue-600 rounded-full transition-all duration-500" id="today-progress" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between mt-1">
+                            <span class="text-[10px] text-gray-300">已完成</span>
+                            <span class="text-[10px] text-blue-600 font-medium" id="today-percent">0%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 连续学习卡片 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-amber-50">
+                        <div class="flex items-center gap-1 mb-2">
+                            <span class="text-xs text-gray-400">🔥 连续学习</span>
+                            <span class="text-[10px] text-amber-400" id="streak-tip">再接再厉</span>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <span class="text-3xl font-bold text-amber-500" id="streak-days">0</span>
+                                <span class="text-xs text-gray-400 ml-1">天</span>
+                            </div>
+                            <div class="flex items-center gap-0.5" id="streak-stars">
+                                <!-- 动态生成星星 -->
+                            </div>
+                        </div>
+                        <div class="mt-3 text-[10px] text-gray-400 border-t border-gray-50 pt-2" id="streak-message">
+                            昨日也学习了，保持下去！
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第二行：最常学习（前十名） -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-gray-700">📊 星轨Top10</span>
+                            <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">最常访问</span>
+                        </div>
+                        <div class="text-[10px] text-gray-400">访问次数 · 占比</div>
+                    </div>
+                    
+                    <div id="top-resources-list" class="space-y-2.5">
+                        <!-- 动态生成前十名列表 -->
+                        <div class="text-center py-8 text-gray-300 text-sm">
+                            <div class="text-3xl mb-2">🌌</div>
+                            <div>暂无学习记录</div>
+                            <div class="text-xs mt-1">点击资源开始记录你的星轨</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第三行：学习小成就（可选） -->
+                <div class="bg-gray-50/50 rounded-xl p-3 border border-dashed border-gray-200">
+                    <div class="flex items-center justify-center gap-4 text-[10px] text-gray-400">
+                        <span>🏆 总学习 <span id="total-visits">0</span>次</span>
+                        <span>📚 学过 <span id="total-resources">0</span>个资源</span>
+                        <span>⭐ 最勤奋 <span id="best-day"></span></span>
+                    </div>
+                </div>
             </div>
             
             <div id="content-starred" class="space-y-2">
@@ -549,6 +631,7 @@
     
             // 1. 记录历史：在用户点击任何资源链接时触发
             function recordHistory(name, url, note) {
+                recordResourceVisit(name, url, note);
                 localStorage.setItem('last_scroll_pos', window.scrollY);
                 let history = JSON.parse(localStorage.getItem('browse_history') || '[]');
                 
@@ -592,35 +675,43 @@
             // 3. 切换选项卡逻辑
             function switchTab(tab) {
                 const isStarred = tab === 'starred';
+                const isHistory = tab === 'history';
+                const isStats = tab === 'stats';
                 
-                // 1. 切换内容显隐
+                // 切换内容显隐
                 document.getElementById('content-starred').style.display = isStarred ? 'block' : 'none';
-                document.getElementById('content-history').style.display = isStarred ? 'none' : 'block';
+                document.getElementById('content-history').style.display = isHistory ? 'block' : 'none';
+                document.getElementById('content-stats').style.display = isStats ? 'block' : 'none';
                 
-                // 2. 获取所有相关的元素
+                // 获取所有相关的元素
                 const starBtn = document.getElementById('tab-starred');
                 const histBtn = document.getElementById('tab-history');
+                const statsBtn = document.getElementById('tab-stats');
                 const starPill = document.getElementById('pill-starred');
                 const histPill = document.getElementById('pill-history');
+                const statsPill = document.getElementById('pill-stats');
+                
+                // 重置所有按钮样式
+                starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+                histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+                statsBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+                
+                // 重置所有小柱子颜色
+                starPill.className = "w-1 h-3 bg-gray-300 rounded-full";
+                histPill.className = "w-1 h-3 bg-gray-300 rounded-full";
+                statsPill.className = "w-1 h-3 bg-gray-300 rounded-full";
                 
                 if (isStarred) {
-                    // 激活“万象星选”时的颜色切换
                     starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
-                    histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
-                    
-                    // 更新小柱子颜色
                     starPill.className = "w-1 h-3 bg-amber-600 rounded-full";
-                    histPill.className = "w-1 h-3 bg-gray-300 rounded-full";
-                } else {
-                    renderHistory(); // 切换到历史时重新渲染
-                    
-                    // 激活“流光碎影”时的颜色切换
+                } else if (isHistory) {
+                    renderHistory();
                     histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
-                    starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
-                    
-                    // 更新小柱子颜色
                     histPill.className = "w-1 h-3 bg-amber-600 rounded-full";
-                    starPill.className = "w-1 h-3 bg-gray-300 rounded-full";
+                } else if (isStats) {
+                    renderStats(); // 新增：渲染统计页面
+                    statsBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
+                    statsPill.className = "w-1 h-3 bg-amber-600 rounded-full";
                 }
             }
     
@@ -787,9 +878,210 @@
                     }
                 });
             }
-            
+                      
             // 页面加载完成后立即执行还原
-            document.addEventListener('DOMContentLoaded', restoreFoldStatus);
+            document.addEventListener('DOMContentLoaded', function() {
+                // 初始化学习统计
+                initLearningStats();
+                
+                // 原有的代码...
+                restoreFoldStatus();
+                
+                // 如果当前显示的是星轨印记，渲染它
+                if (document.getElementById('content-stats').style.display !== 'none') {
+                    renderStats();
+                }
+            });
+
+            // ========== 星轨印记 - 学习统计相关函数 ==========
+
+            // 初始化或获取学习统计数据
+            function initLearningStats() {
+                let stats = JSON.parse(localStorage.getItem('learning_stats'));
+                if (!stats) {
+                    stats = {
+                        totalVisits: 0,
+                        streakDays: 0,
+                        lastVisitDate: '',
+                        todayVisits: 0,
+                        resourceStats: {},  // { "资源名称": { visits: 0, lastVisit: "", name: "", url: "", note: "" } }
+                        bestDay: '',
+                        totalResources: 0
+                    };
+                    localStorage.setItem('learning_stats', JSON.stringify(stats));
+                }
+                return stats;
+            }
+            
+            // 记录资源访问
+            function recordResourceVisit(name, url, note) {
+                const stats = initLearningStats();
+                const today = new Date().toDateString();
+                
+                // 更新今日访问
+                if (stats.lastVisitDate !== today) {
+                    // 新的一天
+                    if (stats.lastVisitDate) {
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        if (stats.lastVisitDate === yesterday.toDateString()) {
+                            stats.streakDays += 1;
+                        } else {
+                            stats.streakDays = 1;
+                        }
+                    } else {
+                        stats.streakDays = 1;
+                    }
+                    stats.todayVisits = 1;
+                    stats.lastVisitDate = today;
+                } else {
+                    stats.todayVisits += 1;
+                }
+                
+                // 更新总访问次数
+                stats.totalVisits += 1;
+                
+                // 更新资源统计
+                if (!stats.resourceStats[name]) {
+                    stats.resourceStats[name] = {
+                        visits: 0,
+                        lastVisit: '',
+                        name: name,
+                        url: url,
+                        note: note || ''
+                    };
+                }
+                stats.resourceStats[name].visits += 1;
+                stats.resourceStats[name].lastVisit = new Date().toLocaleString();
+                
+                // 更新学过资源总数
+                stats.totalResources = Object.keys(stats.resourceStats).length;
+                
+                // 找出最勤奋的一天（今日访问次数最多的一天）
+                // 这里简化处理，只记录今日次数
+                if (stats.todayVisits > (stats.bestDayCount || 0)) {
+                    stats.bestDayCount = stats.todayVisits;
+                    stats.bestDay = today;
+                }
+                
+                localStorage.setItem('learning_stats', JSON.stringify(stats));
+                
+                // 如果当前在星轨印记页面，刷新显示
+                if (document.getElementById('content-stats').style.display !== 'none') {
+                    renderStats();
+                }
+            }
+            
+            // 渲染统计页面
+            function renderStats() {
+                const stats = initLearningStats();
+                const today = new Date();
+                const todayStr = today.toDateString();
+                
+                // 更新日期显示
+                document.getElementById('today-date').textContent = today.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+                
+                // 今日学习
+                const todayVisits = stats.lastVisitDate === todayStr ? stats.todayVisits : 0;
+                const target = 5; // 目标次数
+                const percent = Math.min(Math.round((todayVisits / target) * 100), 100);
+                
+                document.getElementById('today-count').textContent = todayVisits;
+                document.getElementById('today-progress').style.width = percent + '%';
+                document.getElementById('today-percent').textContent = percent + '%';
+                
+                // 连续学习
+                document.getElementById('streak-days').textContent = stats.streakDays;
+                
+                // 生成星星（每7天一颗星）
+                const starCount = Math.floor(stats.streakDays / 7);
+                const streakStars = document.getElementById('streak-stars');
+                streakStars.innerHTML = '';
+                for (let i = 0; i < Math.min(starCount, 5); i++) {
+                    streakStars.innerHTML += '<span class="text-amber-400 text-xs">⭐</span>';
+                }
+                if (starCount === 0) {
+                    streakStars.innerHTML = '<span class="text-gray-200 text-xs">☆☆☆☆☆</span>';
+                } else if (starCount < 5) {
+                    for (let i = starCount; i < 5; i++) {
+                        streakStars.innerHTML += '<span class="text-gray-200 text-xs">☆</span>';
+                    }
+                }
+                
+                // 提示语
+                const streakMsg = document.getElementById('streak-message');
+                if (stats.streakDays === 0) {
+                    streakMsg.textContent = '今天开始你的学习之旅吧！';
+                } else if (stats.streakDays < 3) {
+                    streakMsg.textContent = '好的开始，继续坚持！';
+                } else if (stats.streakDays < 7) {
+                    streakMsg.textContent = '你已经坚持了 ' + stats.streakDays + ' 天，加油！';
+                } else if (stats.streakDays < 30) {
+                    streakMsg.textContent = '🌟 星轨初现，你已经坚持了 ' + stats.streakDays + ' 天';
+                } else {
+                    streakMsg.textContent = '🌠 你是真正的德语之星！连续学习 ' + stats.streakDays + ' 天';
+                }
+                
+                // 总学习统计
+                document.getElementById('total-visits').textContent = stats.totalVisits;
+                document.getElementById('total-resources').textContent = stats.totalResources;
+                document.getElementById('best-day').textContent = stats.bestDay ? new Date(stats.bestDay).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }) : '今日';
+                
+                // 最常学习Top10
+                renderTopResources(stats);
+            }
+            
+            // 渲染最常学习Top10
+            function renderTopResources(stats) {
+                const resourceList = document.getElementById('top-resources-list');
+                
+                // 转换为数组并排序
+                const resources = Object.values(stats.resourceStats)
+                    .sort((a, b) => b.visits - a.visits)
+                    .slice(0, 10);
+                
+                if (resources.length === 0) {
+                    resourceList.innerHTML = `
+                        <div class="text-center py-8 text-gray-300 text-sm">
+                            <div class="text-3xl mb-2">🌌</div>
+                            <div>暂无学习记录</div>
+                            <div class="text-xs mt-1">点击资源开始记录你的星轨</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // 计算总访问次数用于百分比
+                const totalVisits = stats.totalVisits;
+                
+                let html = '';
+                resources.forEach((item, index) => {
+                    const percent = totalVisits > 0 ? Math.round((item.visits / totalVisits) * 100) : 0;
+                    const rankClass = index < 3 ? 'text-amber-500' : 'text-gray-400';
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                    
+                    html += `
+                        <div class="flex items-center gap-2 hover:bg-gray-50 p-1 rounded-lg transition-colors">
+                            <span class="w-5 text-xs font-bold ${rankClass}">${medal || index + 1}</span>
+                            <div class="flex-1 min-w-0">
+                                <a href="${item.url}" target="_blank" onclick="recordHistory('${item.name}', '${item.url}', '${item.note}')" class="block">
+                                    <div class="font-medium text-gray-800 text-sm no-wrap">${item.name}</div>
+                                    <div class="text-[10px] text-gray-400 no-wrap">${item.note || '德语学习资源'}</div>
+                                </a>
+                            </div>
+                            <div class="text-right ml-2">
+                                <div class="text-sm font-bold text-blue-600">${item.visits}次</div>
+                                <div class="text-[10px] text-gray-400">${percent}%</div>
+                            </div>
+                            <div class="w-12 h-1.5 bg-gray-100 rounded-full ml-1">
+                                <div class="h-full bg-blue-500 rounded-full" style="width: ${percent}%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                resourceList.innerHTML = html;
+            }
         </script>
             
         {% with messages = get_flashed_messages() %}
