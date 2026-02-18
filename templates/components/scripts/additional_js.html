@@ -196,13 +196,13 @@
         const streakStars = document.getElementById('streak-stars');
         streakStars.innerHTML = '';
         for (let i = 0; i < Math.min(starCount, 5); i++) {
-            streakStars.innerHTML += '<span class="text-amber-400 text-xs">⭐</span>';
+            streakStars.innerHTML += '<span class="text-amber-400 text-sm">⭐</span>';
         }
         if (starCount === 0) {
-            streakStars.innerHTML = '<span class="text-gray-200 text-xs">☆☆☆☆☆</span>';
+            streakStars.innerHTML = '<span class="text-gray-200 text-sm">☆☆☆☆☆</span>';
         } else if (starCount < 5) {
             for (let i = starCount; i < 5; i++) {
-                streakStars.innerHTML += '<span class="text-gray-200 text-xs">☆</span>';
+                streakStars.innerHTML += '<span class="text-gray-200 text-sm">☆</span>';
             }
         }
 
