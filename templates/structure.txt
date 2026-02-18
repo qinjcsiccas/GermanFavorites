@@ -1,0 +1,35 @@
+templates/
+├── base.html                          # 基础模板
+├── index.html                         # 主页面
+├── 404.html                           # 404错误页
+├── admin_reset.html                    # 管理员重置页
+├── login.html                          # 登录页
+├── register.html                       # 注册页
+├──文件结构.txt                          # 说明文件
+│
+├── components/
+│   ├── progress_flag.html              # 顶部三色条
+│   ├── header.html                     # 头部标题
+│   ├── header_placeholder.html         # 占位块
+│   ├── search_bar.html                 # 搜索行
+│   ├── search_empty.html               # 无结果提示
+│   ├── tabs.html                       # 选项卡
+│   │
+│   ├── content/
+│   │   ├── starred.html                # 万象星选
+│   │   ├── history.html                # 流光碎影
+│   │   └── stats.html                  # 星轨印记
+│   │
+│   ├── category_list.html               # 分类列表（新增）
+│   │
+│   ├── modals/
+│   │   ├── add_modal.html              # 新增资源
+│   │   ├── edit_modal.html             # 编辑资源
+│   │   ├── password_modal.html         # 修改密码
+│   │   ├── target_modal.html           # 设置目标
+│   │   └── confirm_modals.html         # 删除/清空确认
+│   │
+│   └── scripts/
+│       ├── core_js.html                 # 核心函数
+│       ├── learning_stats_js.html       # 学习统计
+│       └── flash_js.html                # Flash消息处理
