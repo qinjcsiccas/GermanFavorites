@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>登录 - 德语资源库</title>
+    <title>登录 - 德语星</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 flex items-center justify-center min-h-screen p-6">
     <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
         <div class="text-center mb-6">
-            <span class="text-4xl">🇩🇪</span>
-            <h1 class="text-2xl font-bold text-gray-800 mt-2">Auf geht’s mit Deutsch!</h1>
+            <img src="{{ url_for('static', filename='icon-512.png.png') }}" alt="Logo" class="w-16 h-16 mx-auto mb-2 object-contain">
+            <h1 class="text-2xl font-bold text-gray-800">Auf geht’s mit Deutsch!</h1>
         </div>
 
         {% with messages = get_flashed_messages() %}
