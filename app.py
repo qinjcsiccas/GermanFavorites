@@ -188,7 +188,7 @@ def edit_resource():
                 break
         
         if found:
-            flash("资源已原地更新 ✨")
+            flash("✨ 资源已更新 ✨")
         else:
             flash("未找到原始资源，无法修改 ⚠️")
             
