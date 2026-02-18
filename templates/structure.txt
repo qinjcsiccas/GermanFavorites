@@ -20,7 +20,6 @@ templates/
 │   │   ├── history.html                # 流光碎影
 │   │   └── stats.html                  # 星轨印记
 │   │
-│   ├── category_list.html               # 分类列表（新增）
 │   │
 │   ├── modals/
 │   │   ├── add_modal.html              # 新增资源
@@ -33,3 +32,4 @@ templates/
 │       ├── core_js.html                 # 核心函数
 │       ├── learning_stats_js.html       # 学习统计
 │       └── flash_js.html                # Flash消息处理
+
