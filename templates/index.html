@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+    <!-- 确保状态栏文字颜色自动适配（黑色） -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f9fafb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)"> 
+    <meta charset="UTF-8">
+    <!-- viewport 设置确保全面屏适配 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- 其余原有头部链接保持不变 -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black"> 
-    <meta name="theme-color" content="#f9fafb">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="msapplication-navbutton-color" content="#000000">  <!-- 这个对某些安卓浏览器有效 -->
+    <meta name="msapplication-navbutton-color" content="#000000">
     <meta name="mobile-web-app-capable" content="yes">
     <title>德语星</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -191,7 +196,7 @@
         .res-row {
             padding: 0.7rem !important;  /* 原来是p-4(1rem) */
             min-height: 64px !important;  /* 从80px降到64px */
-        }        
+        }      
     </style>    
 </head>
     
@@ -234,7 +239,7 @@
         <!-- 占位块，防止内容被固定头部遮挡 -->
         <div class="header-placeholder"></div>
     
-        <div class="flex items-center gap-2 mb-6 h-10 -mt-7">
+        <div class="flex items-center gap-2 mb-6 h-10 -mt-3">
             <button onclick="document.getElementById('addModal').style.display='flex'" 
                     class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100 transition-colors">
                 ➕ 新增
