@@ -147,14 +147,14 @@
             max-width: 28rem;
             margin-left: auto;
             margin-right: auto;
-            padding-left: 0.6rem !important;   /* 原来p-4是1rem，缩小到60% */
-            padding-right: 0.6rem !important;
+            padding-left: 0.7rem !important;   /* 原来p-4是1rem，缩小到60% */
+            padding-right: 0.7rem !important;
         }
         
         /* 头部容器内边距缩小 */
         .app-header .max-w-md {
-            padding-left: 0.6rem !important;
-            padding-right: 0.6rem !important;
+            padding-left: 0.7rem !important;
+            padding-right: 0.7rem !important;
         }
         
         /* 头部整体内边距缩小 */
@@ -187,7 +187,7 @@
         
         /* 资源行内边距缩小 */
         .res-row {
-            padding: 0.6rem !important;  /* 原来是p-4(1rem) */
+            padding: 0.7rem !important;  /* 原来是p-4(1rem) */
             min-height: 64px !important;  /* 从80px降到64px */
         }
 
@@ -207,7 +207,7 @@
             <div class="max-w-md mx-auto flex items-center justify-between px-3">
                 <h1 class="text-2xl font-bold flex items-center gap-2"><span>🇩🇪</span> 德语星 </h1>
                 <div class="settings-menu-container flex items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl border border-gray-100 shadow-sm backdrop-blur-sm relative z-50">
-                    <span class="text-[11px] text-gray-400 font-medium pl-1 pr-1">👤 {{ user }}</span>
+                    <span class="text-[11px] text-gray-400 font-medium pl-1 pr-0.5">👤 {{ user }}</span>
                     
                     <button onclick="toggleSettings()" class="text-lg px-2 hover:bg-gray-100 rounded-xl transition-all">⚙️</button>
                 
@@ -235,7 +235,7 @@
     <!-- 占位块，防止内容被固定头部遮挡 -->
     <div class="header-placeholder"></div>
 
-    <div class="flex items-center gap-2 mb-6 h-10 -mt-3">
+    <div class="flex items-center gap-2 mb-6 h-10 -mt-4">
         <button onclick="document.getElementById('addModal').style.display='flex'" 
                 class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100 transition-colors">
             ➕ 新增
