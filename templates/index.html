@@ -323,12 +323,12 @@
                             <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
                             <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
                         </a>
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-1 mr-3"> <!-- ← 这是控制右侧按钮的容器 -->
                             <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" 
                                class="star-btn {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
                                 {{ '⭐' if item.标星 else '☆' }}
                             </a>
-        
+                    
                             <button onclick="openEditModal('{{ loop.index0 }}', '{{ item.名称 }}', '{{ item.网址 }}', '{{ item.类型 }}', '{{ item.备注 }}')" 
                                     class="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
                                 ✏️
