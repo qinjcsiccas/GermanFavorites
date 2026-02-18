@@ -191,12 +191,10 @@
         .res-row {
             padding: 0.7rem !important;  /* 原来是p-4(1rem) */
             min-height: 64px !important;  /* 从80px降到64px */
-        }
-
-        
-    </style>
-    
+        }        
+    </style>    
 </head>
+    
 <body class="bg-gray-50 min-h-screen pb-20">
     <div class="progress-flag max-w-md mx-auto flex px-3 md:px-0">
         <div class="bg-black"></div>
@@ -205,654 +203,654 @@
     </div>
 
     <main class="main-content max-w-md mx-auto p-4 md:px-0 pt-2">
-        <header class="app-header">
-            <div class="max-w-md mx-auto flex items-center justify-between px-3">
-                <h1 class="text-2xl font-bold flex items-center gap-2"><span>🇩🇪</span> 德语星 </h1>
-                <div class="settings-menu-container flex items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl border border-gray-100 shadow-sm backdrop-blur-sm relative z-50">
-                    <span class="text-[11px] text-gray-400 font-medium pl-1 pr-0.5">👤 {{ user }}</span>
+            <header class="app-header">
+                <div class="max-w-md mx-auto flex items-center justify-between px-3">
+                    <h1 class="text-2xl font-bold flex items-center gap-2"><span>🇩🇪</span> 德语星 </h1>
+                    <div class="settings-menu-container flex items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl border border-gray-100 shadow-sm backdrop-blur-sm relative z-50">
+                        <span class="text-[11px] text-gray-400 font-medium pl-1 pr-0.5">👤 {{ user }}</span>
+                        
+                        <button onclick="toggleSettings()" class="text-lg px-2 hover:bg-gray-100 rounded-xl transition-all">⚙️</button>
                     
-                    <button onclick="toggleSettings()" class="text-lg px-2 hover:bg-gray-100 rounded-xl transition-all">⚙️</button>
-                
-                    <div id="settingsMenu" style="display:none;" class="absolute right-0 w-36 bg-white rounded-2xl shadow-2xl border border-gray-50 z-[9999] py-2 animate-in slide-in-from-top-2 duration-200">
-                    <button onclick="openModal('pwModal')" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2">
-                        🔐 修改密码
-                    </button>
-                    <a href="/export_csv" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2">
-                        📥 导出收藏
-                    </a>
-                    <button onclick="clearBrowseHistory()" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2 border-t border-gray-50">
-                        🧹 清空历史
-                    </button>
-                    <a href="mailto:1419629781@qq.com?subject=德语资源库反馈&body=你好Jincheng，我想反馈：" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2 border-t border-gray-50">
-                        📧 反馈建议
-                    </a>
-                    <a href="/logout" class="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2 border-t border-gray-50 font-bold">
-                        🚪 退出登录
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- 占位块，防止内容被固定头部遮挡 -->
-    <div class="header-placeholder"></div>
-
-    <div class="flex items-center gap-2 mb-6 h-10 -mt-4">
-        <button onclick="document.getElementById('addModal').style.display='flex'" 
-                class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100 transition-colors">
-            ➕ 新增
-        </button>
-        <div class="flex-1 h-full">
-            <input type="text" id="liveSearchInput" oninput="liveSearch(this.value)" 
-                   placeholder="🔍 搜索资源、备注或分类..." 
-                   class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white">
-        </div>
-        <div id="search-empty" class="hidden text-center py-10">
-            <div class="text-3xl mb-3">🔭</div>
-            <p class="text-gray-400 text-sm italic">星海茫茫，未见此迹</p>
-        </div>        
-        <button id="randomBtn" onclick="feelLucky()" 
-                class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50 transition-all duration-300">
-            🎲
-        </button>
-    </div>
-    
-    <div class="mb-6">
-        <div class="mb-2 flex items-center gap-3 px-1">
-            <button id="tab-starred" onclick="switchTab('starred')" 
-                    class="text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1">
-                <span id="pill-starred" class="w-1 h-3 bg-amber-600 rounded-full"></span> 万象星选
-            </button>
-            
-            <button id="tab-history" onclick="switchTab('history')" 
-                    class="text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1">
-                <span id="pill-history" class="w-1 h-3 bg-gray-300 rounded-full"></span> 流光碎影
-            </button>
-        </div>
-        
-        <div id="content-starred" class="space-y-2">
-            {% if starred %}
-                {% for item in starred %}
-                <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
-                    <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
-                        <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
-                        <div class="text-xs text-gray-500 no-wrap mt-0.5 leading-normal">{{ item.备注 }}</div>
-                    </a>
-                    <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="w-9 h-9 flex items-center justify-center text-2xl flex-shrink-0">⭐</a>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="text-center py-4 text-xs text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                    星海广袤，愿君采撷
-                </div>
-            {% endif %}
-        </div>
-    
-        <div id="content-history" class="space-y-2" style="display: none;">
-            <div id="history-list" class="space-y-2">
-                </div>
-        </div>
-    </div>
-
-    <hr class="mb-6 border-gray-200">
-
-    <div class="space-y-4">
-        {% for cat, items in cat_data.items() %}
-        {# 使用 slugify 确保 ID 格式标准，并移除默认的 open 属性使其初始折叠 #}
-        <details id="cat-{{ cat|slugify }}" 
-                 class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" 
-                 ontoggle="saveFoldStatus('cat-{{ cat|slugify }}')">
-            <summary class="flex items-center justify-between p-4 font-bold text-gray-600 cursor-pointer list-none active:bg-gray-50 transition-colors">
-                <div class="flex items-center gap-2">
-                    <span class="text-lg">📂 {{ cat }}</span>
-                    <span class="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full ml-1">{{ items|length }}</span>
-                </div>
-                <span class="text-gray-400 transition-transform group-open:rotate-180">▼</span>
-            </summary>
-            <div class="px-4 pb-2 space-y-1">
-                {% for item in items %}
-                <div class="res-row py-3 border-b border-gray-50 last:border-0">
-                    <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
-                        <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
-                        <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
-                    </a>
-                    <div class="flex items-center gap-1">
-                        <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" 
-                           class="star-btn {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
-                            {{ '⭐' if item.标星 else '☆' }}
-                        </a>
-    
-                        <button onclick="openEditModal('{{ loop.index0 }}', '{{ item.名称 }}', '{{ item.网址 }}', '{{ item.类型 }}', '{{ item.备注 }}')" 
-                                class="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
-                            ✏️
+                        <div id="settingsMenu" style="display:none;" class="absolute right-0 w-36 bg-white rounded-2xl shadow-2xl border border-gray-50 z-[9999] py-2 animate-in slide-in-from-top-2 duration-200">
+                        <button onclick="openModal('pwModal')" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2">
+                            🔐 修改密码
                         </button>
+                        <a href="/export_csv" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2">
+                            📥 导出收藏
+                        </a>
+                        <button onclick="clearBrowseHistory()" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2 border-t border-gray-50">
+                            🧹 清空历史
+                        </button>
+                        <a href="mailto:1419629781@qq.com?subject=德语资源库反馈&body=你好Jincheng，我想反馈：" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2 border-t border-gray-50">
+                            📧 反馈建议
+                        </a>
+                        <a href="/logout" class="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2 border-t border-gray-50 font-bold">
+                            🚪 退出登录
+                        </a>
                     </div>
                 </div>
-                {% endfor %}
-            </div>
-        </details>
-        {% endfor %}
-    </div>
-
-    <div id="pwModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[300]">        
-        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">🔐</div>
-                <h3 class="font-bold text-gray-800">安全修改密码</h3>
-            </div>
-            
-            <form action="/change_password" method="post" class="space-y-3">
-                <input type="password" name="old_password" placeholder="请输入当前旧密码" required 
-                       class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
-                
-                <div class="h-px bg-gray-100 my-2"></div>
-                
-                <div class="relative">
-                    <input type="password" id="new_pw" name="new_password" placeholder="设置新密码 (6位以上)" required 
-                           class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
-                    <button type="button" id="toggleBtn" onclick="togglePw('new_pw', 'toggleBtn')" 
-                            class="absolute right-4 top-4 text-gray-400 transition-all duration-200">
-                        🙈
-                    </button>
-                </div>
+            </header>
     
-                <input type="password" name="confirm_password" placeholder="再次确认新密码" required 
-                       class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
-                
-                <div class="flex gap-2 pt-4">
-                    <button type="button" onclick="document.getElementById('pwModal').style.display='none'" 
-                            class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm font-medium">取消</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
-                        确认修改
-                    </button>
-                </div>
-            </form>
+        <!-- 占位块，防止内容被固定头部遮挡 -->
+        <div class="header-placeholder"></div>
+    
+        <div class="flex items-center gap-2 mb-6 h-10 -mt-7">
+            <button onclick="document.getElementById('addModal').style.display='flex'" 
+                    class="h-full bg-white border border-gray-300 text-gray-500 px-4 rounded-lg text-sm font-bold shadow-sm active:bg-gray-100 transition-colors">
+                ➕ 新增
+            </button>
+            <div class="flex-1 h-full">
+                <input type="text" id="liveSearchInput" oninput="liveSearch(this.value)" 
+                       placeholder="🔍 搜索资源、备注或分类..." 
+                       class="w-full h-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white">
+            </div>
+            <div id="search-empty" class="hidden text-center py-10">
+                <div class="text-3xl mb-3">🔭</div>
+                <p class="text-gray-400 text-sm italic">星海茫茫，未见此迹</p>
+            </div>        
+            <button id="randomBtn" onclick="feelLucky()" 
+                    class="h-full aspect-square flex items-center justify-center bg-white border border-gray-300 rounded-lg text-lg shadow-sm active:bg-gray-50 transition-all duration-300">
+                🎲
+            </button>
         </div>
-    </div>
-    
-    <script>
-        window.addEventListener('load', () => {
-            document.body.classList.add('loaded');
-        });
         
-        // 1. 实时搜索：让 details 标签根据输入隐藏/显示
-        // 升级版实时联想搜索
-        function liveSearch(val) {
-            const searchVal = val.toLowerCase().trim();
-            const categories = document.querySelectorAll('details[id^="cat-"]');
-            const starredRows = document.querySelectorAll('#content-starred .res-row');
-            const emptyState = document.getElementById('search-empty');
-            const starredSection = document.getElementById('content-starred');
+        <div class="mb-6">
+            <div class="mb-2 flex items-center gap-3 px-1">
+                <button id="tab-starred" onclick="switchTab('starred')" 
+                        class="text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1">
+                    <span id="pill-starred" class="w-1 h-3 bg-amber-600 rounded-full"></span> 万象星选
+                </button>
+                
+                <button id="tab-history" onclick="switchTab('history')" 
+                        class="text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1">
+                    <span id="pill-history" class="w-1 h-3 bg-gray-300 rounded-full"></span> 流光碎影
+                </button>
+            </div>
             
-            let totalVisibleItems = 0;
+            <div id="content-starred" class="space-y-2">
+                {% if starred %}
+                    {% for item in starred %}
+                    <div class="res-row bg-white p-4 rounded-xl shadow-md border border-amber-100">
+                        <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
+                            <div class="font-bold text-gray-900 no-wrap text-base">{{ item.名称 }}</div>
+                            <div class="text-xs text-gray-500 no-wrap mt-0.5 leading-normal">{{ item.备注 }}</div>
+                        </a>
+                        <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" class="w-9 h-9 flex items-center justify-center text-2xl flex-shrink-0">⭐</a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4 text-xs text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                        星海广袤，愿君采撷
+                    </div>
+                {% endif %}
+            </div>
         
-            // --- 1. 处理万象星选区域 ---
-            let visibleStars = 0;
-            starredRows.forEach(row => {
-                // 抓取名称和备注文本
-                const text = row.innerText.toLowerCase();
-                if (text.includes(searchVal)) {
-                    row.style.display = 'flex';
-                    visibleStars++;
-                    totalVisibleItems++;
-                } else {
-                    row.style.display = 'none';
-                }
+            <div id="content-history" class="space-y-2" style="display: none;">
+                <div id="history-list" class="space-y-2">
+                    </div>
+            </div>
+        </div>
+    
+        <hr class="mb-6 border-gray-200">
+    
+        <div class="space-y-4">
+            {% for cat, items in cat_data.items() %}
+            {# 使用 slugify 确保 ID 格式标准，并移除默认的 open 属性使其初始折叠 #}
+            <details id="cat-{{ cat|slugify }}" 
+                     class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" 
+                     ontoggle="saveFoldStatus('cat-{{ cat|slugify }}')">
+                <summary class="flex items-center justify-between p-4 font-bold text-gray-600 cursor-pointer list-none active:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">📂 {{ cat }}</span>
+                        <span class="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full ml-1">{{ items|length }}</span>
+                    </div>
+                    <span class="text-gray-400 transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <div class="px-4 pb-2 space-y-1">
+                    {% for item in items %}
+                    <div class="res-row py-3 border-b border-gray-50 last:border-0">
+                        <a href="{{ item.网址 }}" target="_blank" onclick="recordHistory('{{ item.名称 }}', '{{ item.网址 }}', '{{ item.备注 }}')" class="flex-1 min-w-0 mr-4">
+                            <div class="font-semibold text-gray-800 no-wrap">{{ item.名称 }}</div>
+                            <div class="text-[11px] text-gray-500 no-wrap mt-0.5">{{ item.备注 }}</div>
+                        </a>
+                        <div class="flex items-center gap-1">
+                            <a href="/toggle/{{ item.名称|slugify }}?q={{ q }}" onclick="triggerFeedback(this)" 
+                               class="star-btn {{ 'text-amber-400' if item.标星 else 'star-empty' }}">
+                                {{ '⭐' if item.标星 else '☆' }}
+                            </a>
+        
+                            <button onclick="openEditModal('{{ loop.index0 }}', '{{ item.名称 }}', '{{ item.网址 }}', '{{ item.类型 }}', '{{ item.备注 }}')" 
+                                    class="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
+                                ✏️
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    
+        <div id="pwModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[300]">        
+            <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">🔐</div>
+                    <h3 class="font-bold text-gray-800">安全修改密码</h3>
+                </div>
+                
+                <form action="/change_password" method="post" class="space-y-3">
+                    <input type="password" name="old_password" placeholder="请输入当前旧密码" required 
+                           class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
+                    
+                    <div class="h-px bg-gray-100 my-2"></div>
+                    
+                    <div class="relative">
+                        <input type="password" id="new_pw" name="new_password" placeholder="设置新密码 (6位以上)" required 
+                               class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
+                        <button type="button" id="toggleBtn" onclick="togglePw('new_pw', 'toggleBtn')" 
+                                class="absolute right-4 top-4 text-gray-400 transition-all duration-200">
+                            🙈
+                        </button>
+                    </div>
+        
+                    <input type="password" name="confirm_password" placeholder="再次确认新密码" required 
+                           class="w-full border border-gray-100 rounded-xl p-3.5 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
+                    
+                    <div class="flex gap-2 pt-4">
+                        <button type="button" onclick="document.getElementById('pwModal').style.display='none'" 
+                                class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm font-medium">取消</button>
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+                            确认修改
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <script>
+            window.addEventListener('load', () => {
+                document.body.classList.add('loaded');
             });
-        
-            // 如果星选区一个匹配都没有，隐藏整个星选容器（可选，保持整洁）
-            if (searchVal !== "" && visibleStars === 0) {
-                // 这里的逻辑可以根据喜好调整，建议保留容器结构但隐藏内部行
-            }
-        
-            // --- 2. 处理分类列表区域 ---
-            categories.forEach(cat => {
-                const items = cat.querySelectorAll('.res-row');
-                let hasVisibleItem = false;
-        
-                items.forEach(item => {
-                    const text = item.innerText.toLowerCase();
+            
+            // 1. 实时搜索：让 details 标签根据输入隐藏/显示
+            // 升级版实时联想搜索
+            function liveSearch(val) {
+                const searchVal = val.toLowerCase().trim();
+                const categories = document.querySelectorAll('details[id^="cat-"]');
+                const starredRows = document.querySelectorAll('#content-starred .res-row');
+                const emptyState = document.getElementById('search-empty');
+                const starredSection = document.getElementById('content-starred');
+                
+                let totalVisibleItems = 0;
+            
+                // --- 1. 处理万象星选区域 ---
+                let visibleStars = 0;
+                starredRows.forEach(row => {
+                    // 抓取名称和备注文本
+                    const text = row.innerText.toLowerCase();
                     if (text.includes(searchVal)) {
-                        item.style.display = 'flex';
-                        hasVisibleItem = true;
+                        row.style.display = 'flex';
+                        visibleStars++;
                         totalVisibleItems++;
                     } else {
-                        item.style.display = 'none';
+                        row.style.display = 'none';
                     }
                 });
-        
-                // 搜索时自动展开有结果的分类，清空时恢复折叠
-                if (searchVal === "") {
-                    cat.style.display = 'block';
-                    // 恢复用户之前的折叠状态
-                    const savedStatus = localStorage.getItem(cat.id);
-                    cat.open = (savedStatus === 'open');
-                } else if (hasVisibleItem) {
-                    cat.style.display = 'block';
-                    cat.open = true;
-                } else {
-                    cat.style.display = 'none';
+            
+                // 如果星选区一个匹配都没有，隐藏整个星选容器（可选，保持整洁）
+                if (searchVal !== "" && visibleStars === 0) {
+                    // 这里的逻辑可以根据喜好调整，建议保留容器结构但隐藏内部行
                 }
-            });
-        
-            // --- 3. 精确控制“未见此迹”提示 ---
-            if (searchVal !== "" && totalVisibleItems === 0) {
-                emptyState.classList.remove('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-            }
-        }
-
-        // 2. 打开编辑弹窗并自动填充数据
-        function openEditModal(idx, name, url, type, note) {
-            // 存入用于修改的新值框
-            document.getElementById('edit_name').value = name;
-            document.getElementById('edit_url').value = url;
-            document.getElementById('edit_type').value = type;
-            document.getElementById('edit_note').value = note;
-        
-            // 存入用于后端定位的旧值隐藏域
-            document.getElementById('old_name').value = name;
-            document.getElementById('old_url').value = url;
-        
-            document.getElementById('editModal').style.display = 'flex';
-        }
-
-        // 3. 小眼睛切换逻辑
-        function togglePw(id, btnId) {
-            const input = document.getElementById(id);
-            const btn = document.getElementById(btnId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                btn.innerText = '🙉'; // 这里的表情你可以换成喜欢的睁眼猴子或 👁️
-            } else {
-                input.type = 'password';
-                btn.innerText = '🙈';
-            }
-        }
-
-        // 切换设置菜单显示
-        function toggleSettings() {
-            const menu = document.getElementById('settingsMenu');
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-        }
-        
-        // 点击页面其他地方关闭菜单
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('settingsMenu');
-            const btn = e.target.closest('button');
-            if (!menu.contains(e.target) && (!btn || btn.innerText !== '⚙️')) {
-                menu.style.display = 'none';
-            }
-        });
-        
-        // 统一打开 Modal 的函数
-        function openModal(id) {
-            document.getElementById(id).style.display = 'flex';
-            document.getElementById('settingsMenu').style.display = 'none';
-        }
-
-        // 1. 记录历史：在用户点击任何资源链接时触发
-        function recordHistory(name, url, note) {
-            localStorage.setItem('last_scroll_pos', window.scrollY);
-            let history = JSON.parse(localStorage.getItem('browse_history') || '[]');
             
-            // 移除已存在的同名记录，确保不重复
-            history = history.filter(item => item.url !== url);
+                // --- 2. 处理分类列表区域 ---
+                categories.forEach(cat => {
+                    const items = cat.querySelectorAll('.res-row');
+                    let hasVisibleItem = false;
             
-            // 将新记录插入到最前面
-            history.unshift({ name, url, note, time: new Date().getTime() });
-            
-            // 只保留最近 10 条
-            if (history.length > 10) history.pop();
-            
-            localStorage.setItem('browse_history', JSON.stringify(history));
-        }
-        
-        // 2. 渲染历史列表
-        function renderHistory() {
-            const history = JSON.parse(localStorage.getItem('browse_history') || '[]');
-            const container = document.getElementById('history-list');
-            
-            if (history.length === 0) {
-                container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"> 碎影无踪，流光未铭 </div>';
-                return;
-            }
-        
-            container.innerHTML = history.map((item, index) => {
-                const opacity = Math.max(0.3, 1 - (index * 0.07)); 
-                return `
-                <div class="res-row bg-white p-4 rounded-xl shadow-md border border-gray-100 transition-opacity duration-500" 
-                     style="opacity: ${opacity};">
-                    <a href="${item.url}" target="_blank" ... class="flex-1 min-w-0 mr-4">
-                        <div class="font-bold text-gray-900 no-wrap text-base">${item.name}</div>
-                        <div class="text-xs text-gray-500 no-wrap mt-0.5 leading-normal">${item.note || '往日留痕'}</div>
-                    </a>
-                    <div class="w-9 h-9 flex items-center justify-center text-xl opacity-40 flex-shrink-0">🕒</div>
-                </div>
-                `;
-            }).join('');
-        }
-        
-        // 3. 切换选项卡逻辑
-        function switchTab(tab) {
-            const isStarred = tab === 'starred';
-            
-            // 1. 切换内容显隐
-            document.getElementById('content-starred').style.display = isStarred ? 'block' : 'none';
-            document.getElementById('content-history').style.display = isStarred ? 'none' : 'block';
-            
-            // 2. 获取所有相关的元素
-            const starBtn = document.getElementById('tab-starred');
-            const histBtn = document.getElementById('tab-history');
-            const starPill = document.getElementById('pill-starred');
-            const histPill = document.getElementById('pill-history');
-            
-            if (isStarred) {
-                // 激活“万象星选”时的颜色切换
-                starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
-                histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
-                
-                // 更新小柱子颜色
-                starPill.className = "w-1 h-3 bg-amber-600 rounded-full";
-                histPill.className = "w-1 h-3 bg-gray-300 rounded-full";
-            } else {
-                renderHistory(); // 切换到历史时重新渲染
-                
-                // 激活“流光碎影”时的颜色切换
-                histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
-                starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
-                
-                // 更新小柱子颜色
-                histPill.className = "w-1 h-3 bg-amber-600 rounded-full";
-                starPill.className = "w-1 h-3 bg-gray-300 rounded-full";
-            }
-        }
-
-        // 清空本地浏览历史记录
-        // 1. 唤起自定义弹窗
-        function clearBrowseHistory() {
-            document.getElementById('settingsMenu').style.display = 'none';
-            document.getElementById('clearHistoryModal').style.display = 'flex';
-        }
-        
-        // 2. 关闭弹窗
-        function closeClearModal() {
-            document.getElementById('clearHistoryModal').style.display = 'none';
-        }
-        
-        // 3. 执行清空逻辑
-        function executeClearHistory() {
-            localStorage.removeItem('browse_history');
-            
-            if (document.getElementById('content-history').style.display !== 'none') {
-                renderHistory();
-            }
-            
-            closeClearModal();
-            
-            if (typeof showToast === 'function') {
-                // 传入图标替代骰子
-                showToast("碎影散尽，流光清寂", "🧹"); 
-            }
-        }
-
-        
-    </script>
-
-    <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
-            <h3 class="text-lg font-bold mb-5 text-gray-800">添加新资源</h3>
-            <form action="/add" method="post" class="space-y-4">
-                <input type="text" name="name" placeholder="资源名称 (例如: Easy German)" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
-                <input type="url" name="url" value="https://" placeholder="网址必须以 https:// 或 http:// 开头" required 
-                       class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
-                <select name="type" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400">
-                    {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
-                </select>    
-                <input type="text" name="note" placeholder="备注 (可选)" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
-                <div class="flex gap-3 mt-2">
-                    <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-xl text-sm font-medium">取消</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-blue-200">确认添加</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // 综合反馈：震动 + 沙漏动画
-        function triggerFeedback(el) {          
-            el.classList.add('vibrate'); 
-            setTimeout(() => {
-                el.innerHTML = '<span class="loading-spin">⏳</span>'; 
-                el.style.pointerEvents = 'none'; 
-            }, 100);
-        }
-
-        function feelLucky() {
-            if (navigator.vibrate) {
-                navigator.vibrate([10, 30, 10]); // 短促的两次震动
-            }            
-            const btn = document.getElementById('randomBtn');
-            const tips = [
-                "正在为您寻找德语秘境...",
-                "Looking for German secrets...",
-                "Deutsch-Gott wählt aus...", 
-                "看看今天学点什么好呢？",
-                "Was lernen wir heute?", 
-                "德语之神正在挑选...",
-                "Selecting your destiny...",
-                "Viel Glück heute!",
-                "正在加载惊喜...",
-                "Surprise is loading...",
-                "Eine Überraschung kommt!",
-                // --- 以下是关于你的开发者彩蛋 ---
-                "Built with ❤️ by Jincheng Qin.",
-                "Jincheng 祝你德语进步！",
-                "Ready for the next challenge?",
-                "Keep calm and learn German.",
-                "Jincheng 正在为你同步云端资源...",
-                "Viel Spaß beim Lernen!" // 祝学习愉快！
-            ];
-            const randomTip = tips[Math.floor(Math.random() * tips.length)];
-        
-            // 1. 开始仪式：增加动画和发光
-            btn.classList.add('dice-spin', 'dice-glow');
-            
-            // 2. 弹出仪式感提示（使用你现有的 Toast 逻辑）
-            showToast(randomTip); // 如果你之前有 showToast 函数
-        
-            // 3. 延迟 800ms 后跳转，给动画留出表现时间
-            setTimeout(() => {
-                window.location.href = '/random';
-            }, 800);
-        }
-        
-        // 屏幕中心悬浮气泡
-        function showToast(msg, icon = '🎲') {
-            const toast = document.createElement('div');
-            toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-lg text-white text-lg font-bold px-10 py-6 rounded-3xl shadow-2xl z-[500] animate-in zoom-in duration-300 text-center whitespace-nowrap max-w-[90vw] border border-white/10";
-            toast.innerHTML = `
-                    <div class="text-3xl mb-3">${icon}</div> 
-                    <div class="leading-relaxed">${msg}</div> 
-                `;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => toast.remove(), 500);
-            }, 2200);
-        }
-
-        // 删除资源二次确认
-        function confirmDelete() {
-            // 先把要删除的数据存到隐藏表单里
-            document.getElementById('delete_name').value = document.getElementById('edit_name').value;
-            document.getElementById('delete_url').value = document.getElementById('edit_url').value;
-            
-            // 显示自定义弹窗
-            document.getElementById('customConfirmModal').style.display = 'flex';
-        }
-        
-        // 关闭弹窗
-        function closeConfirm() {
-            document.getElementById('customConfirmModal').style.display = 'none';
-        }
-        
-        // 真正执行删除提交
-        function executeDelete() {
-            document.getElementById('deleteForm').submit();
-        }
-
-        // 1. 保存状态：当用户点击展开或折叠时触发
-        function saveFoldStatus(id) {
-            // 稍微延迟执行，确保获取的是点击后的状态
-            setTimeout(() => {
-                const el = document.getElementById(id);
-                const isOpen = el.hasAttribute('open');
-                localStorage.setItem(id, isOpen ? 'open' : 'closed');
-            }, 50);
-        }
-        
-        // 2. 还原状态：页面加载时自动运行
-        function restoreFoldStatus() {
-            const categories = document.querySelectorAll('details[id^="cat-"]');
-            categories.forEach(cat => {
-                const savedStatus = localStorage.getItem(cat.id);
-                
-                if (savedStatus === 'open') {
-                    cat.setAttribute('open', ''); // 恢复展开
-                } else if (savedStatus === 'closed') {
-                    cat.removeAttribute('open');  // 恢复折叠
-                } else {
-                    // 初始状态：如果没有记录，默认折叠
-                    cat.removeAttribute('open'); 
-                }
-            });
-        }
-        
-        // 页面加载完成后立即执行还原
-        document.addEventListener('DOMContentLoaded', restoreFoldStatus);
-    </script>
-        
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 1. 处理 Flash 消息 (保持原样)
-            {% with messages = get_flashed_messages() %}
-                {% for message in messages %}
-                    if (typeof showToast === 'function') {
-                        let icon = "{{ message }}".includes("删除") ? "🗑️" : "✨";
-                        showToast("{{ message }}", icon);
-                    }
-                {% endfor %}
-            {% endwith %}
-        
-            // 2. 丝滑恢复位置核心逻辑
-            const savedScrollPos = localStorage.getItem('last_scroll_pos');
-            if (savedScrollPos) {
-                const targetPos = parseInt(savedScrollPos);
-                
-                // 技巧：先禁止浏览器的自动恢复行为
-                if ('scrollRestoration' in history) {
-                    history.scrollRestoration = 'manual';
-                }
-        
-                // 尝试立即跳转（如果 DOM 渲染够快）
-                window.scrollTo(0, targetPos);
-        
-                // 为了保险，在微小延迟后再强制确认一次，解决 details 展开导致的高度抖动
-                setTimeout(() => {
-                    window.scrollTo({
-                        top: targetPos,
-                        behavior: 'auto' // 去掉 smooth，直接到位
+                    items.forEach(item => {
+                        const text = item.innerText.toLowerCase();
+                        if (text.includes(searchVal)) {
+                            item.style.display = 'flex';
+                            hasVisibleItem = true;
+                            totalVisibleItems++;
+                        } else {
+                            item.style.display = 'none';
+                        }
                     });
-                    localStorage.removeItem('last_scroll_pos');
-                }, 50); // 缩短到 50ms，肉眼几乎不可察觉
+            
+                    // 搜索时自动展开有结果的分类，清空时恢复折叠
+                    if (searchVal === "") {
+                        cat.style.display = 'block';
+                        // 恢复用户之前的折叠状态
+                        const savedStatus = localStorage.getItem(cat.id);
+                        cat.open = (savedStatus === 'open');
+                    } else if (hasVisibleItem) {
+                        cat.style.display = 'block';
+                        cat.open = true;
+                    } else {
+                        cat.style.display = 'none';
+                    }
+                });
+            
+                // --- 3. 精确控制“未见此迹”提示 ---
+                if (searchVal !== "" && totalVisibleItems === 0) {
+                    emptyState.classList.remove('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                }
             }
-        });
-        </script>
-      {% endif %}
-    {% endwith %}
     
-    <script>
-        if (!window.hasExecutedFlashScroll) { // 防止重复执行
-            document.addEventListener('DOMContentLoaded', function() {
-                const savedScrollPos = localStorage.getItem('last_scroll_pos');
-                if (savedScrollPos) {
-                    setTimeout(() => {
-                        window.scrollTo({ top: parseInt(savedScrollPos), behavior: 'auto' }); // 恢复时建议用 auto 更快
-                        localStorage.removeItem('last_scroll_pos');
-                    }, 100);
+            // 2. 打开编辑弹窗并自动填充数据
+            function openEditModal(idx, name, url, type, note) {
+                // 存入用于修改的新值框
+                document.getElementById('edit_name').value = name;
+                document.getElementById('edit_url').value = url;
+                document.getElementById('edit_type').value = type;
+                document.getElementById('edit_note').value = note;
+            
+                // 存入用于后端定位的旧值隐藏域
+                document.getElementById('old_name').value = name;
+                document.getElementById('old_url').value = url;
+            
+                document.getElementById('editModal').style.display = 'flex';
+            }
+    
+            // 3. 小眼睛切换逻辑
+            function togglePw(id, btnId) {
+                const input = document.getElementById(id);
+                const btn = document.getElementById(btnId);
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.innerText = '🙉'; // 这里的表情你可以换成喜欢的睁眼猴子或 👁️
+                } else {
+                    input.type = 'password';
+                    btn.innerText = '🙈';
+                }
+            }
+    
+            // 切换设置菜单显示
+            function toggleSettings() {
+                const menu = document.getElementById('settingsMenu');
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+            
+            // 点击页面其他地方关闭菜单
+            document.addEventListener('click', function(e) {
+                const menu = document.getElementById('settingsMenu');
+                const btn = e.target.closest('button');
+                if (!menu.contains(e.target) && (!btn || btn.innerText !== '⚙️')) {
+                    menu.style.display = 'none';
                 }
             });
-        }
-    </script>
-
-    <div id="editModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[300]">
-        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl">
-            <h3 class="font-bold mb-4 text-gray-800 text-center">📝 修改资源信息</h3>
             
-            <form action="/edit_resource" method="post" class="space-y-3">
-                <input type="hidden" name="old_name" id="old_name">
-                <input type="hidden" name="old_url" id="old_url">
-                <input type="hidden" name="index" id="edit_index">
-                <input type="text" name="name" id="edit_name" required class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                <input type="text" name="url" id="edit_url" placeholder="网址必须以 https:// 或 http:// 开头" required 
-                    class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">                
-                <select name="type" id="edit_type" class="w-full border border-gray-100 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-blue-400">
-                    {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
-                </select>
-                <textarea name="note" id="edit_note" class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none" rows="2"></textarea>
+            // 统一打开 Modal 的函数
+            function openModal(id) {
+                document.getElementById(id).style.display = 'flex';
+                document.getElementById('settingsMenu').style.display = 'none';
+            }
+    
+            // 1. 记录历史：在用户点击任何资源链接时触发
+            function recordHistory(name, url, note) {
+                localStorage.setItem('last_scroll_pos', window.scrollY);
+                let history = JSON.parse(localStorage.getItem('browse_history') || '[]');
                 
-                <div class="flex flex-col gap-2 pt-2">
-                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
-                        保存修改
-                    </button>
-    
-                    <div class="flex gap-2">
-                        <button type="button" onclick="confirmDelete()" 
-                                class="flex-1 bg-red-50 text-red-500 py-3 rounded-2xl text-sm font-bold border border-red-100 active:bg-red-100 transition-colors shadow-sm">
-                            🗑️ 删除资源
-                        </button>
-                        <button type="button" onclick="document.getElementById('editModal').style.display='none'" 
-                                class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm">取消</button>
-                    </div>
-                </div>
-            </form>
-    
-            <form id="deleteForm" action="/delete_resource" method="post" style="display:none;">
-                <input type="hidden" name="name" id="delete_name">
-                <input type="hidden" name="url" id="delete_url">
-            </form>
-        </div>
-    </div>
-
-    <div id="customConfirmModal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm items-center justify-center p-6 z-[400]">
-        <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in duration-200 text-center">
-            <div class="text-3xl mb-3">⚠️</div>
-            <h3 class="font-bold text-gray-800 text-lg mb-2">确认删除？</h3>
-            <p class="text-sm text-gray-500 mb-6">资源删除后将无法找回，确定要继续吗？</p>
+                // 移除已存在的同名记录，确保不重复
+                history = history.filter(item => item.url !== url);
+                
+                // 将新记录插入到最前面
+                history.unshift({ name, url, note, time: new Date().getTime() });
+                
+                // 只保留最近 10 条
+                if (history.length > 10) history.pop();
+                
+                localStorage.setItem('browse_history', JSON.stringify(history));
+            }
             
-            <div class="flex gap-3">
-                <button onclick="closeConfirm()" class="flex-1 bg-gray-100 text-gray-400 py-3 rounded-2xl text-sm font-medium">取消</button>
-                <button onclick="executeDelete()" class="flex-1 bg-red-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">确认删除</button>
+            // 2. 渲染历史列表
+            function renderHistory() {
+                const history = JSON.parse(localStorage.getItem('browse_history') || '[]');
+                const container = document.getElementById('history-list');
+                
+                if (history.length === 0) {
+                    container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200"> 碎影无踪，流光未铭 </div>';
+                    return;
+                }
+            
+                container.innerHTML = history.map((item, index) => {
+                    const opacity = Math.max(0.3, 1 - (index * 0.07)); 
+                    return `
+                    <div class="res-row bg-white p-4 rounded-xl shadow-md border border-gray-100 transition-opacity duration-500" 
+                         style="opacity: ${opacity};">
+                        <a href="${item.url}" target="_blank" ... class="flex-1 min-w-0 mr-4">
+                            <div class="font-bold text-gray-900 no-wrap text-base">${item.name}</div>
+                            <div class="text-xs text-gray-500 no-wrap mt-0.5 leading-normal">${item.note || '往日留痕'}</div>
+                        </a>
+                        <div class="w-9 h-9 flex items-center justify-center text-xl opacity-40 flex-shrink-0">🕒</div>
+                    </div>
+                    `;
+                }).join('');
+            }
+            
+            // 3. 切换选项卡逻辑
+            function switchTab(tab) {
+                const isStarred = tab === 'starred';
+                
+                // 1. 切换内容显隐
+                document.getElementById('content-starred').style.display = isStarred ? 'block' : 'none';
+                document.getElementById('content-history').style.display = isStarred ? 'none' : 'block';
+                
+                // 2. 获取所有相关的元素
+                const starBtn = document.getElementById('tab-starred');
+                const histBtn = document.getElementById('tab-history');
+                const starPill = document.getElementById('pill-starred');
+                const histPill = document.getElementById('pill-history');
+                
+                if (isStarred) {
+                    // 激活“万象星选”时的颜色切换
+                    starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
+                    histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+                    
+                    // 更新小柱子颜色
+                    starPill.className = "w-1 h-3 bg-amber-600 rounded-full";
+                    histPill.className = "w-1 h-3 bg-gray-300 rounded-full";
+                } else {
+                    renderHistory(); // 切换到历史时重新渲染
+                    
+                    // 激活“流光碎影”时的颜色切换
+                    histBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-amber-600 border-b-2 border-amber-600 pb-1";
+                    starBtn.className = "text-sm font-bold uppercase tracking-widest flex items-center gap-1 transition-all text-gray-400 border-b-2 border-transparent pb-1";
+                    
+                    // 更新小柱子颜色
+                    histPill.className = "w-1 h-3 bg-amber-600 rounded-full";
+                    starPill.className = "w-1 h-3 bg-gray-300 rounded-full";
+                }
+            }
+    
+            // 清空本地浏览历史记录
+            // 1. 唤起自定义弹窗
+            function clearBrowseHistory() {
+                document.getElementById('settingsMenu').style.display = 'none';
+                document.getElementById('clearHistoryModal').style.display = 'flex';
+            }
+            
+            // 2. 关闭弹窗
+            function closeClearModal() {
+                document.getElementById('clearHistoryModal').style.display = 'none';
+            }
+            
+            // 3. 执行清空逻辑
+            function executeClearHistory() {
+                localStorage.removeItem('browse_history');
+                
+                if (document.getElementById('content-history').style.display !== 'none') {
+                    renderHistory();
+                }
+                
+                closeClearModal();
+                
+                if (typeof showToast === 'function') {
+                    // 传入图标替代骰子
+                    showToast("碎影散尽，流光清寂", "🧹"); 
+                }
+            }
+    
+            
+        </script>
+    
+        <div id="addModal" style="display:none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm items-center justify-center p-6 z-50">
+            <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+                <h3 class="text-lg font-bold mb-5 text-gray-800">添加新资源</h3>
+                <form action="/add" method="post" class="space-y-4">
+                    <input type="text" name="name" placeholder="资源名称 (例如: Easy German)" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
+                    <input type="url" name="url" value="https://" placeholder="网址必须以 https:// 或 http:// 开头" required 
+                           class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
+                    <select name="type" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400">
+                        {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
+                    </select>    
+                    <input type="text" name="note" placeholder="备注 (可选)" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 bg-gray-50">
+                    <div class="flex gap-3 mt-2">
+                        <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="flex-1 bg-gray-100 text-gray-500 py-3 rounded-xl text-sm font-medium">取消</button>
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-blue-200">确认添加</button>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
-
-    <div id="clearHistoryModal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm items-center justify-center p-6 z-[400]">
-        <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in duration-200 text-center border border-amber-50">
-            <div class="text-3xl mb-3">✨</div>
-            <h3 class="font-bold text-gray-800 text-lg mb-2">碎影流光，相忘江湖？</h3>
-            <p class="text-sm text-gray-500 mb-6 px-2">确定要清空浏览历史吗？<br>此操作不可撤销。</p>
+    
+        <script>
+            // 综合反馈：震动 + 沙漏动画
+            function triggerFeedback(el) {          
+                el.classList.add('vibrate'); 
+                setTimeout(() => {
+                    el.innerHTML = '<span class="loading-spin">⏳</span>'; 
+                    el.style.pointerEvents = 'none'; 
+                }, 100);
+            }
+    
+            function feelLucky() {
+                if (navigator.vibrate) {
+                    navigator.vibrate([10, 30, 10]); // 短促的两次震动
+                }            
+                const btn = document.getElementById('randomBtn');
+                const tips = [
+                    "正在为您寻找德语秘境...",
+                    "Looking for German secrets...",
+                    "Deutsch-Gott wählt aus...", 
+                    "看看今天学点什么好呢？",
+                    "Was lernen wir heute?", 
+                    "德语之神正在挑选...",
+                    "Selecting your destiny...",
+                    "Viel Glück heute!",
+                    "正在加载惊喜...",
+                    "Surprise is loading...",
+                    "Eine Überraschung kommt!",
+                    // --- 以下是关于你的开发者彩蛋 ---
+                    "Built with ❤️ by Jincheng Qin.",
+                    "Jincheng 祝你德语进步！",
+                    "Ready for the next challenge?",
+                    "Keep calm and learn German.",
+                    "Jincheng 正在为你同步云端资源...",
+                    "Viel Spaß beim Lernen!" // 祝学习愉快！
+                ];
+                const randomTip = tips[Math.floor(Math.random() * tips.length)];
             
-            <div class="flex gap-3">
-                <button onclick="closeClearModal()" class="flex-1 bg-gray-100 text-gray-400 py-3 rounded-2xl text-sm font-medium">暂且保留</button>
-                <button onclick="executeClearHistory()" class="flex-1 bg-amber-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">挥手作别</button>
+                // 1. 开始仪式：增加动画和发光
+                btn.classList.add('dice-spin', 'dice-glow');
+                
+                // 2. 弹出仪式感提示（使用你现有的 Toast 逻辑）
+                showToast(randomTip); // 如果你之前有 showToast 函数
+            
+                // 3. 延迟 800ms 后跳转，给动画留出表现时间
+                setTimeout(() => {
+                    window.location.href = '/random';
+                }, 800);
+            }
+            
+            // 屏幕中心悬浮气泡
+            function showToast(msg, icon = '🎲') {
+                const toast = document.createElement('div');
+                toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-lg text-white text-lg font-bold px-10 py-6 rounded-3xl shadow-2xl z-[500] animate-in zoom-in duration-300 text-center whitespace-nowrap max-w-[90vw] border border-white/10";
+                toast.innerHTML = `
+                        <div class="text-3xl mb-3">${icon}</div> 
+                        <div class="leading-relaxed">${msg}</div> 
+                    `;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => toast.remove(), 500);
+                }, 2200);
+            }
+    
+            // 删除资源二次确认
+            function confirmDelete() {
+                // 先把要删除的数据存到隐藏表单里
+                document.getElementById('delete_name').value = document.getElementById('edit_name').value;
+                document.getElementById('delete_url').value = document.getElementById('edit_url').value;
+                
+                // 显示自定义弹窗
+                document.getElementById('customConfirmModal').style.display = 'flex';
+            }
+            
+            // 关闭弹窗
+            function closeConfirm() {
+                document.getElementById('customConfirmModal').style.display = 'none';
+            }
+            
+            // 真正执行删除提交
+            function executeDelete() {
+                document.getElementById('deleteForm').submit();
+            }
+    
+            // 1. 保存状态：当用户点击展开或折叠时触发
+            function saveFoldStatus(id) {
+                // 稍微延迟执行，确保获取的是点击后的状态
+                setTimeout(() => {
+                    const el = document.getElementById(id);
+                    const isOpen = el.hasAttribute('open');
+                    localStorage.setItem(id, isOpen ? 'open' : 'closed');
+                }, 50);
+            }
+            
+            // 2. 还原状态：页面加载时自动运行
+            function restoreFoldStatus() {
+                const categories = document.querySelectorAll('details[id^="cat-"]');
+                categories.forEach(cat => {
+                    const savedStatus = localStorage.getItem(cat.id);
+                    
+                    if (savedStatus === 'open') {
+                        cat.setAttribute('open', ''); // 恢复展开
+                    } else if (savedStatus === 'closed') {
+                        cat.removeAttribute('open');  // 恢复折叠
+                    } else {
+                        // 初始状态：如果没有记录，默认折叠
+                        cat.removeAttribute('open'); 
+                    }
+                });
+            }
+            
+            // 页面加载完成后立即执行还原
+            document.addEventListener('DOMContentLoaded', restoreFoldStatus);
+        </script>
+            
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // 1. 处理 Flash 消息 (保持原样)
+                {% with messages = get_flashed_messages() %}
+                    {% for message in messages %}
+                        if (typeof showToast === 'function') {
+                            let icon = "{{ message }}".includes("删除") ? "🗑️" : "✨";
+                            showToast("{{ message }}", icon);
+                        }
+                    {% endfor %}
+                {% endwith %}
+            
+                // 2. 丝滑恢复位置核心逻辑
+                const savedScrollPos = localStorage.getItem('last_scroll_pos');
+                if (savedScrollPos) {
+                    const targetPos = parseInt(savedScrollPos);
+                    
+                    // 技巧：先禁止浏览器的自动恢复行为
+                    if ('scrollRestoration' in history) {
+                        history.scrollRestoration = 'manual';
+                    }
+            
+                    // 尝试立即跳转（如果 DOM 渲染够快）
+                    window.scrollTo(0, targetPos);
+            
+                    // 为了保险，在微小延迟后再强制确认一次，解决 details 展开导致的高度抖动
+                    setTimeout(() => {
+                        window.scrollTo({
+                            top: targetPos,
+                            behavior: 'auto' // 去掉 smooth，直接到位
+                        });
+                        localStorage.removeItem('last_scroll_pos');
+                    }, 50); // 缩短到 50ms，肉眼几乎不可察觉
+                }
+            });
+            </script>
+          {% endif %}
+        {% endwith %}
+        
+        <script>
+            if (!window.hasExecutedFlashScroll) { // 防止重复执行
+                document.addEventListener('DOMContentLoaded', function() {
+                    const savedScrollPos = localStorage.getItem('last_scroll_pos');
+                    if (savedScrollPos) {
+                        setTimeout(() => {
+                            window.scrollTo({ top: parseInt(savedScrollPos), behavior: 'auto' }); // 恢复时建议用 auto 更快
+                            localStorage.removeItem('last_scroll_pos');
+                        }, 100);
+                    }
+                });
+            }
+        </script>
+    
+        <div id="editModal" style="display:none;" class="fixed inset-0 bg-black/60 backdrop-blur-md items-center justify-center p-6 z-[300]">
+            <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl">
+                <h3 class="font-bold mb-4 text-gray-800 text-center">📝 修改资源信息</h3>
+                
+                <form action="/edit_resource" method="post" class="space-y-3">
+                    <input type="hidden" name="old_name" id="old_name">
+                    <input type="hidden" name="old_url" id="old_url">
+                    <input type="hidden" name="index" id="edit_index">
+                    <input type="text" name="name" id="edit_name" required class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                    <input type="text" name="url" id="edit_url" placeholder="网址必须以 https:// 或 http:// 开头" required 
+                        class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">                
+                    <select name="type" id="edit_type" class="w-full border border-gray-100 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-blue-400">
+                        {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
+                    </select>
+                    <textarea name="note" id="edit_note" class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none" rows="2"></textarea>
+                    
+                    <div class="flex flex-col gap-2 pt-2">
+                        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+                            保存修改
+                        </button>
+        
+                        <div class="flex gap-2">
+                            <button type="button" onclick="confirmDelete()" 
+                                    class="flex-1 bg-red-50 text-red-500 py-3 rounded-2xl text-sm font-bold border border-red-100 active:bg-red-100 transition-colors shadow-sm">
+                                🗑️ 删除资源
+                            </button>
+                            <button type="button" onclick="document.getElementById('editModal').style.display='none'" 
+                                    class="flex-1 bg-gray-50 text-gray-400 py-3 rounded-2xl text-sm">取消</button>
+                        </div>
+                    </div>
+                </form>
+        
+                <form id="deleteForm" action="/delete_resource" method="post" style="display:none;">
+                    <input type="hidden" name="name" id="delete_name">
+                    <input type="hidden" name="url" id="delete_url">
+                </form>
+            </div>
+        </div>
+    
+        <div id="customConfirmModal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm items-center justify-center p-6 z-[400]">
+            <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in duration-200 text-center">
+                <div class="text-3xl mb-3">⚠️</div>
+                <h3 class="font-bold text-gray-800 text-lg mb-2">确认删除？</h3>
+                <p class="text-sm text-gray-500 mb-6">资源删除后将无法找回，确定要继续吗？</p>
+                
+                <div class="flex gap-3">
+                    <button onclick="closeConfirm()" class="flex-1 bg-gray-100 text-gray-400 py-3 rounded-2xl text-sm font-medium">取消</button>
+                    <button onclick="executeDelete()" class="flex-1 bg-red-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">确认删除</button>
+                </div>
+            </div>
+        </div>
+    
+        <div id="clearHistoryModal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm items-center justify-center p-6 z-[400]">
+            <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in duration-200 text-center border border-amber-50">
+                <div class="text-3xl mb-3">✨</div>
+                <h3 class="font-bold text-gray-800 text-lg mb-2">碎影流光，相忘江湖？</h3>
+                <p class="text-sm text-gray-500 mb-6 px-2">确定要清空浏览历史吗？<br>此操作不可撤销。</p>
+                
+                <div class="flex gap-3">
+                    <button onclick="closeClearModal()" class="flex-1 bg-gray-100 text-gray-400 py-3 rounded-2xl text-sm font-medium">暂且保留</button>
+                    <button onclick="executeClearHistory()" class="flex-1 bg-amber-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">挥手作别</button>
+                </div>
             </div>
         </div>
     </main>
