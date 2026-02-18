@@ -17,6 +17,38 @@
         summary::-webkit-details-marker { display: none; }
         body { opacity: 0; transition: opacity 0.2s ease-in; padding-top: env(safe-area-inset-top);}
         body.loaded { opacity: 1; }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            padding-top: max(8px, env(safe-area-inset-top));
+            padding-bottom: 8px;
+            background-color: #f9fafb;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            box-sizing: border-box;
+        }
+        
+        .header-placeholder {
+            width: 100%;
+            min-height: calc(44px + max(8px, env(safe-area-inset-top)) + 8px);
+            margin-bottom: 12px;
+        }
+        
+        .progress-flag {
+            position: relative;
+            width: 100%;
+            height: 4px;
+            display: flex;
+            z-index: 99;
+        }
+        .progress-flag > div {
+            flex: 1 1 0;
+        }
         
         /* 增强描边空心星星 */
         .star-empty {
@@ -94,25 +126,24 @@
     
 </head>
 <body class="bg-gray-50 min-h-screen pb-20">
-
-    <div class="h-8 w-full bg-white"></div> 
-
-    <div class="h-1 w-full flex">
-        <div class="h-full w-1/3 bg-black"></div>
-        <div class="h-full w-1/3 bg-[#FF0000]"></div>
-        <div class="h-full w-1/3 bg-[#FFCC00]"></div>
+    <div class="progress-flag max-w-md mx-auto flex px-4 md:px-0">
+        <div class="bg-black"></div>
+        <div class="bg-[#FF0000]"></div>
+        <div class="bg-[#FFCC00]"></div>
     </div>
 
+    <main class="main-content max-w-md mx-auto p-4 md:px-0 pt-2">
     <div class="max-w-md mx-auto p-4 md:px-0">
 
-        <div class="flex items-center justify-between mb-6 px-1">
-            <h1 class="text-2xl font-bold flex items-center gap-2"><span>🇩🇪</span> 德语星 </h1>
-            <div class="flex items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl border border-gray-100 shadow-sm backdrop-blur-sm relative z-50">
-                <span class="text-[11px] text-gray-400 font-medium px-1">👤 {{ user }}</span>
+        <header class="app-header">
+            <div class="max-w-md mx-auto flex items-center justify-between px-1">
+                <h1 class="text-2xl font-bold flex items-center gap-2"><span>🇩🇪</span> 德语星 </h1>
+                <div class="settings-menu-container flex items-center gap-1.5 bg-white/60 p-1.5 rounded-2xl border border-gray-100 shadow-sm backdrop-blur-sm relative z-50">
+                    <span class="text-[11px] text-gray-400 font-medium px-1">👤 {{ user }}</span>
+                    
+                    <button onclick="toggleSettings()" class="text-lg px-2 hover:bg-gray-100 rounded-xl transition-all">⚙️</button>
                 
-                <button onclick="toggleSettings()" class="text-lg px-2 hover:bg-gray-100 rounded-xl transition-all">⚙️</button>
-            
-                <div id="settingsMenu" style="display:none;" class="absolute right-0 top-12 w-36 bg-white rounded-2xl shadow-2xl border border-gray-50 z-[9999] py-2 animate-in slide-in-from-top-2 duration-200">
+                    <div id="settingsMenu" style="display:none;" class="absolute right-0 w-36 bg-white rounded-2xl shadow-2xl border border-gray-50 z-[9999] py-2 animate-in slide-in-from-top-2 duration-200">
                     <button onclick="openModal('pwModal')" class="w-full text-left px-4 py-3 text-sm text-gray-600 hover:bg-blue-50 flex items-center gap-2">
                         🔐 修改密码
                     </button>
@@ -131,6 +162,10 @@
                 </div>
             </div>
         </div>
+    </header>
+
+    <!-- 占位块，防止内容被固定头部遮挡 -->
+    <div class="header-placeholder"></div>
 
     <div class="flex items-center gap-2 mb-6 h-10">
         <button onclick="document.getElementById('addModal').style.display='flex'" 
@@ -753,4 +788,5 @@
     </div>
         
 </body>
+</main>
 </html>
