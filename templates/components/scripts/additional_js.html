@@ -175,7 +175,7 @@
         learningTimer = setInterval(() => {
             if (stats.currentSession) {
                 const elapsed = Math.floor((Date.now() - stats.currentSession.startTime) / 1000);
-                // 🛠️ 修复：让面板显示的是【今日已学总时间 + 正在进行的这段时间】，而不是从 0 开始跳
+                // 🌟 修复：让今日总时长 = 之前学过的时间 + 正在挂机的时间，视觉上不再从0跳
                 updateLearningDisplay((stats.todayLearningTime || 0) + elapsed);
             }
         }, 1000);
@@ -184,9 +184,9 @@
             renderStats();
         }
         
-        // 🔴 新增：显示结束按钮
-        const stopBtn = document.getElementById('stop-learning-btn');
-        if (stopBtn) stopBtn.style.display = 'inline-block';
+        // 🌟 新增：开始学习时，显示我们刚刚在 HTML 里加的长条按钮
+        const sessionContainer = document.getElementById('active-session-container');
+        if (sessionContainer) sessionContainer.style.display = 'block';
     }
     
     function updateLearningDisplay(seconds) {
@@ -238,6 +238,31 @@
         
         stats.currentSession = null;
         localStorage.setItem('learning_stats', JSON.stringify(stats));
+    }
+
+    // ✅ 新增功能：点击长条按钮手动结束当前学习
+    function manualEndLearning() {
+        const stats = initLearningStats();
+        if (!stats.currentSession) return;
+        
+        const resourceName = stats.currentSession.name;
+        
+        // 1. 调用原有的核心结算逻辑，把时间存入本地
+        endLearning(); 
+        
+        // 2. 隐藏长条按钮容器
+        const sessionContainer = document.getElementById('active-session-container');
+        if (sessionContainer) sessionContainer.style.display = 'none';
+        
+        // 3. 重新渲染统计面板的数据
+        if (document.getElementById('content-stats') && document.getElementById('content-stats').style.display !== 'none') {
+            renderStats(); 
+        }
+        
+        // 4. 屏幕中间弹窗提示结算成功
+        if (typeof showToast === 'function') {
+            showToast(`已结束学习: ${resourceName}`, '✅');
+        }
     }
 
     function manualEndLearning() {
