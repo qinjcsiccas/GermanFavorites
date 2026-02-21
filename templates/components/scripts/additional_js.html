@@ -1,0 +1,496 @@
+<script>
+    function triggerFeedback(el) {          
+        el.classList.add('vibrate'); 
+        setTimeout(() => {
+            el.innerHTML = '<span class="loading-spin">⏳</span>'; 
+            el.style.pointerEvents = 'none'; 
+        }, 100);
+    }
+
+    function feelLucky() {
+        if (navigator.vibrate) {
+            navigator.vibrate([10, 30, 10]);            
+        }            
+        const btn = document.getElementById('randomBtn');
+        const tips = [
+            "正在为您寻找德语秘境...",
+            "Looking for German secrets...",
+            "Deutsch-Gott wählt aus...", 
+            "看看今天学点什么好呢？",
+            "Was lernen wir heute?", 
+            "德语之神正在挑选...",
+            "Selecting your destiny...",
+            "Viel Glück heute!",
+            "正在加载惊喜...",
+            "Surprise is loading...",
+            "Eine Überraschung kommt!",
+            "Built with ❤️ by Jincheng Qin.",
+            "Jincheng 祝你德语进步！",
+            "Ready for the next challenge?",
+            "Keep calm and learn German.",
+            "Jincheng 正在为你同步云端资源...",
+            "Viel Spaß beim Lernen!"
+        ];
+        const randomTip = tips[Math.floor(Math.random() * tips.length)];
+    
+        btn.classList.add('dice-spin', 'dice-glow');
+        
+        showToast(randomTip);
+    
+        setTimeout(() => {
+            window.location.href = '/random';
+        }, 800);
+    }
+    
+    function showToast(msg, icon = '🎲') {
+        const toast = document.createElement('div');
+        toast.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-lg text-white text-lg font-bold px-10 py-6 rounded-3xl shadow-2xl z-[500] animate-in zoom-in duration-300 text-center whitespace-nowrap max-w-[90vw] border border-white/10";
+        toast.innerHTML = `
+                <div class="text-3xl mb-3">${icon}</div> 
+                <div class="leading-relaxed">${msg}</div> 
+            `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => toast.remove(), 500);
+        }, 2200);
+    }
+
+    function confirmDelete() {
+        document.getElementById('delete_name').value = document.getElementById('edit_name').value;
+        document.getElementById('delete_url').value = document.getElementById('edit_url').value;
+        
+        document.getElementById('customConfirmModal').style.display = 'flex';
+    }
+    
+    function closeConfirm() {
+        document.getElementById('customConfirmModal').style.display = 'none';
+    }
+    
+    function executeDelete() {
+        document.getElementById('deleteForm').submit();
+    }
+
+    function saveFoldStatus(id) {
+        setTimeout(() => {
+            const el = document.getElementById(id);
+            const isOpen = el.hasAttribute('open');
+            localStorage.setItem(id, isOpen ? 'open' : 'closed');
+        }, 50);
+    }
+    
+    function restoreFoldStatus() {
+        const categories = document.querySelectorAll('details[id^="cat-"]');
+        categories.forEach(cat => {
+            const savedStatus = localStorage.getItem(cat.id);
+            
+            if (savedStatus === 'open') {
+                cat.setAttribute('open', '');
+            } else if (savedStatus === 'closed') {
+                cat.removeAttribute('open');
+            } else {
+                cat.removeAttribute('open'); 
+            }
+        });
+    }
+              
+    document.addEventListener('DOMContentLoaded', function() {
+        const stats = initLearningStats();
+        
+        restoreFoldStatus();
+        
+        if (stats.currentSession) {
+            const sessionContainer = document.getElementById('active-session-container');
+            if (sessionContainer) sessionContainer.style.display = 'block';
+            
+            const now = Date.now();
+            const elapsed = Math.floor((now - stats.currentSession.startTime) / 1000);
+            learningTimer = setInterval(() => {
+                const e = Math.floor((Date.now() - stats.currentSession.startTime) / 1000);
+                updateLearningDisplay(e);
+            }, 1000);
+        }
+        
+        const statsEl = document.getElementById('content-stats');
+        if (statsEl && statsEl.style.display !== 'none') {
+            renderStats();
+        }
+    });
+
+    function initLearningStats() {
+        let stats = JSON.parse(localStorage.getItem('learning_stats'));
+        if (!stats || typeof stats.totalLearningTime === 'undefined') {
+            stats = {
+                totalLearningTime: 0,
+                streakDays: 0,
+                lastVisitDate: '',
+                todayLearningTime: 0,
+                resourceStats: {},
+                bestDay: '',
+                totalResources: 0,
+                currentSession: null
+            };
+            localStorage.setItem('learning_stats', JSON.stringify(stats));
+        }
+        return stats;
+    }
+    
+    let learningTimer = null;
+    
+    function startLearning(name, url, note) {
+        const stats = initLearningStats();
+        const now = Date.now();
+        
+        if (stats.currentSession) {
+            endLearning();
+        }
+        
+        stats.currentSession = {
+            name: name,
+            url: url,
+            note: note || '',
+            startTime: now,
+            startDate: new Date().toDateString()
+        };
+        
+        const today = new Date().toDateString();
+        if (stats.lastVisitDate !== today) {
+            if (stats.lastVisitDate) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                if (stats.lastVisitDate === yesterday.toDateString()) {
+                    stats.streakDays += 1;
+                } else {
+                    stats.streakDays = 1;
+                }
+            } else {
+                stats.streakDays = 1;
+            }
+            stats.lastVisitDate = today;
+        }
+        
+        if (!stats.resourceStats[name]) {
+            stats.resourceStats[name] = {
+                learningTime: 0,
+                lastVisit: '',
+                name: name,
+                url: url,
+                note: note || ''
+            };
+        }
+        
+        localStorage.setItem('learning_stats', JSON.stringify(stats));
+                
+        learningTimer = setInterval(() => {
+            if (stats.currentSession) {
+                const elapsed = Math.floor((Date.now() - stats.currentSession.startTime) / 1000);
+                // 🌟 修复：让今日总时长 = 之前学过的时间 + 正在挂机的时间，视觉上不再从0跳
+                updateLearningDisplay((stats.todayLearningTime || 0) + elapsed);
+            }
+        }, 1000);
+        
+        if (document.getElementById('content-stats') && document.getElementById('content-stats').style.display !== 'none') {
+            renderStats();
+        }
+        
+        // 🌟 新增：开始学习时，显示我们刚刚在 HTML 里加的长条按钮
+        const sessionContainer = document.getElementById('active-session-container');
+        if (sessionContainer) sessionContainer.style.display = 'block';
+    }
+    
+    function updateLearningDisplay(seconds) {
+        const countEl = document.getElementById('today-count');
+        if (countEl && seconds && !isNaN(seconds)) {
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 1) {
+                countEl.textContent = Math.floor(seconds) + '秒';
+            } else if (minutes < 60) {
+                countEl.textContent = minutes + '分';
+            } else {
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                countEl.textContent = hours + '时' + mins + '分';
+            }
+        }
+    }
+    
+    function endLearning() {
+        const stats = initLearningStats();
+        
+        if (learningTimer) {
+            clearInterval(learningTimer);
+            learningTimer = null;
+        }
+        
+        if (!stats.currentSession) return;
+        
+        const now = Date.now();
+        const sessionDuration = Math.floor((now - stats.currentSession.startTime) / 1000);
+        
+        if (sessionDuration >= 5) {
+            stats.totalLearningTime += sessionDuration;
+            stats.todayLearningTime += sessionDuration;
+            
+            const resourceName = stats.currentSession.name;
+            if (stats.resourceStats[resourceName]) {
+                stats.resourceStats[resourceName].learningTime += sessionDuration;
+                stats.resourceStats[resourceName].lastVisit = new Date().toLocaleString();
+            }
+            
+            if (stats.todayLearningTime > (stats.bestDayTime || 0)) {
+                stats.bestDayTime = stats.todayLearningTime;
+                stats.bestDay = stats.currentSession.startDate;
+            }
+            
+            stats.totalResources = Object.keys(stats.resourceStats).length;
+        }
+        
+        stats.currentSession = null;
+        localStorage.setItem('learning_stats', JSON.stringify(stats));
+        
+        const sessionContainer = document.getElementById('active-session-container');
+        if (sessionContainer) sessionContainer.style.display = 'none';
+    }
+
+    // ✅ 新增功能：点击长条按钮手动结束当前学习
+    function manualEndLearning() {
+        const stats = initLearningStats();
+        if (!stats.currentSession) return;
+        
+        const resourceName = stats.currentSession.name;
+        
+        // 1. 调用原有的核心结算逻辑，把时间存入本地
+        endLearning(); 
+        
+        // 2. 隐藏长条按钮容器
+        const sessionContainer = document.getElementById('active-session-container');
+        if (sessionContainer) sessionContainer.style.display = 'none';
+        
+        // 3. 重新渲染统计面板的数据
+        if (document.getElementById('content-stats') && document.getElementById('content-stats').style.display !== 'none') {
+            renderStats(); 
+        }
+        
+        // 4. 屏幕中间弹窗提示结算成功
+        if (typeof showToast === 'function') {
+            showToast(`已结束学习: ${resourceName}`, '✅');
+        }
+    }
+
+    window.addEventListener('beforeunload', function() {
+        endLearning();
+    });
+    
+    function recordResourceVisit(name, url, note) {
+        startLearning(name, url, note);
+    }
+
+    function recordHistory(name, url, note) {
+        startLearning(name, url, note);
+    }
+    
+    function formatTime(seconds) {
+        if (!seconds || seconds <= 0 || isNaN(seconds)) return '0秒';
+        if (seconds < 60) return Math.floor(seconds) + '秒';
+        if (seconds < 3600) return Math.floor(seconds / 60) + '分';
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        return hours + '时' + mins + '分';
+    }
+    
+    function renderStats() {
+        const stats = initLearningStats();
+        const stopBtn = document.getElementById('stop-learning-btn');
+        if (stopBtn) {
+            stopBtn.style.display = stats.currentSession ? 'inline-block' : 'none';
+        }
+        const today = new Date();
+        const todayStr = today.toDateString();
+        
+        document.getElementById('today-date').textContent = today.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
+        
+        const todayTime = stats.lastVisitDate === todayStr ? stats.todayLearningTime : 0;
+        let target = getLearningTarget() * 60;
+        if (!target || target <= 0) target = 300;
+        const percent = target > 0 ? Math.min(Math.round((todayTime / target) * 100), 100) : 0;
+        document.getElementById('today-target').textContent = Math.floor(target / 60);
+        
+        document.getElementById('today-count').textContent = todayTime > 0 ? formatTime(todayTime) : '0秒';
+        document.getElementById('today-progress').style.width = percent + '%';
+        document.getElementById('today-percent').textContent = percent + '%';
+        
+        document.getElementById('streak-days').textContent = stats.streakDays;
+        
+        const starCount = Math.floor(stats.streakDays / 7);
+        const streakStars = document.getElementById('streak-stars');
+        streakStars.innerHTML = '';
+        for (let i = 0; i < Math.min(starCount, 5); i++) {
+            streakStars.innerHTML += '<span class="text-amber-400 text-base">⭐</span>';
+        }
+        if (starCount === 0) {
+            streakStars.innerHTML = '<span class="text-gray-200 text-base">☆☆☆☆☆</span>';
+        } else if (starCount < 5) {
+            for (let i = starCount; i < 5; i++) {
+                streakStars.innerHTML += '<span class="text-gray-200 text-base">☆</span>';
+            }
+        }
+
+        const streakMsg = document.getElementById('streak-message');
+        if (stats.streakDays === 0) {
+            streakMsg.textContent = '今天开始你的学习之旅吧！';
+        } else if (stats.streakDays < 3) {
+            streakMsg.textContent = '好的开始，继续坚持！';
+        } else if (stats.streakDays < 7) {
+            streakMsg.textContent = '你已经坚持了 ' + stats.streakDays + ' 天，加油！';
+        } else if (stats.streakDays < 30) {
+            streakMsg.textContent = '🌟 星轨初现，你已经坚持了 ' + stats.streakDays + ' 天';
+        } else {
+            streakMsg.textContent = '🌠 你是真正的德语之星！连续学习 ' + stats.streakDays + ' 天';
+        }
+        
+        document.getElementById('total-visits').textContent = formatTime(stats.totalLearningTime);
+        document.getElementById('total-resources').textContent = stats.totalResources;
+        document.getElementById('best-day').textContent = stats.bestDay ? new Date(stats.bestDay).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }) : '今日';
+        
+        renderTopResources(stats);
+    }
+
+    function getLearningTarget() {
+        let target = localStorage.getItem('daily_target');
+        if (!target) {
+            target = 5;
+            localStorage.setItem('daily_target', target);
+        }
+        return parseInt(target);
+    }
+    
+    function showTargetSetting() {
+        const currentTarget = getLearningTarget();
+        document.getElementById('targetValue').textContent = currentTarget;
+        document.getElementById('targetModal').style.display = 'flex';
+    }
+    
+    function adjustTarget(delta) {
+        const targetElement = document.getElementById('targetValue');
+        let current = parseInt(targetElement.textContent);
+        let newValue = current + delta;
+        if (newValue >= 1 && newValue <= 50) {
+            targetElement.textContent = newValue;
+        }
+    }
+    
+    function saveTarget() {
+        const newTarget = parseInt(document.getElementById('targetValue').textContent);
+        localStorage.setItem('daily_target', newTarget);
+        document.getElementById('targetModal').style.display = 'none';
+        
+        const statsEl = document.getElementById('content-stats');
+        if (statsEl && statsEl.style.display !== 'none') {
+            renderStats();
+        }
+        
+        showToast(`每日目标已设为 ${newTarget} 分钟`, '🎯');
+    }
+    
+    function renderTopResources(stats) {
+        const resourceList = document.getElementById('top-resources-list');
+        
+        const resources = Object.values(stats.resourceStats)
+            .sort((a, b) => b.learningTime - a.learningTime)
+            .slice(0, 10);
+        
+        if (resources.length === 0) {
+            resourceList.innerHTML = `
+                <div class="text-center py-8 text-gray-300 text-sm">
+                    <div class="text-3xl mb-2">🌌</div>
+                    <div>暂无学习记录</div>
+                    <div class="text-xs mt-1">点击资源开始记录你的星轨</div>
+                </div>
+            `;
+            return;
+        }
+        
+        const totalTime = stats.totalLearningTime;
+        
+        let html = '';
+        resources.forEach((item, index) => {
+            const percent = totalTime > 0 ? Math.round((item.learningTime / totalTime) * 100) : 0;
+            const rankClass = index < 3 ? 'text-amber-500' : 'text-gray-400';
+            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+            
+            html += `
+                <div class="flex items-center gap-2 hover:bg-gray-50 p-1 rounded-lg transition-colors">
+                    <span class="w-5 text-xs font-bold ${rankClass}">${medal || index + 1}</span>
+                    <div class="flex-1 min-w-0">
+                        <a href="${item.url}" target="_blank" onclick="recordHistory('${item.name}', '${item.url}', '${item.note}')" class="block">
+                            <div class="font-medium text-gray-800 text-base no-wrap">${item.name}</div>
+                            <div class="text-xs text-gray-400 no-wrap">${item.note || '德语学习资源'}</div>
+                        </a>
+                    </div>
+                    <div class="text-right ml-2">
+                        <div class="text-sm font-bold text-blue-600">${formatTime(item.learningTime)}</div>
+                        <div class="text-xs text-gray-400">${percent}%</div>
+                    </div>
+                    <div class="w-12 h-1.5 bg-gray-100 rounded-full ml-1">
+                        <div class="h-full bg-blue-500 rounded-full" style="width: ${percent}%"></div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        resourceList.innerHTML = html;
+    }
+</script>
+            
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                if (typeof showToast === 'function') {
+                    let icon = "{{ message }}".includes("删除") ? "🗑️" : "✨";
+                    showToast("{{ message }}", icon);
+                }
+            {% endfor %}
+        {% endwith %}
+    
+        const savedScrollPos = localStorage.getItem('last_scroll_pos');
+        if (savedScrollPos) {
+            const targetPos = parseInt(savedScrollPos);
+            
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+    
+            window.scrollTo(0, targetPos);
+    
+            setTimeout(() => {
+                window.scrollTo({
+                    top: targetPos,
+                    behavior: 'auto'
+                });
+                localStorage.removeItem('last_scroll_pos');
+            }, 50);
+        }
+    });
+    </script>
+  {% endif %}
+{% endwith %}
+
+<script>
+    if (!window.hasExecutedFlashScroll) {
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedScrollPos = localStorage.getItem('last_scroll_pos');
+            if (savedScrollPos) {
+                setTimeout(() => {
+                    window.scrollTo({ top: parseInt(savedScrollPos), behavior: 'auto' });
+                    localStorage.removeItem('last_scroll_pos');
+                }, 100);
+            }
+        });
+    }
+</script>
