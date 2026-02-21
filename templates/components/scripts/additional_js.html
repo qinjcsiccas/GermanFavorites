@@ -102,14 +102,15 @@
         
         restoreFoldStatus();
         
-        if (document.getElementById('content-stats').style.display !== 'none') {
+        const statsEl = document.getElementById('content-stats');
+        if (statsEl && statsEl.style.display !== 'none') {
             renderStats();
         }
     });
 
     function initLearningStats() {
         let stats = JSON.parse(localStorage.getItem('learning_stats'));
-        if (!stats) {
+        if (!stats || typeof stats.totalLearningTime === 'undefined') {
             stats = {
                 totalLearningTime: 0,
                 streakDays: 0,
@@ -156,7 +157,6 @@
             } else {
                 stats.streakDays = 1;
             }
-            stats.todayLearningTime = 0;
             stats.lastVisitDate = today;
         }
         
@@ -186,10 +186,10 @@
     
     function updateLearningDisplay(seconds) {
         const countEl = document.getElementById('today-count');
-        if (countEl) {
+        if (countEl && seconds && !isNaN(seconds)) {
             const minutes = Math.floor(seconds / 60);
             if (minutes < 1) {
-                countEl.textContent = seconds + '秒';
+                countEl.textContent = Math.floor(seconds) + '秒';
             } else if (minutes < 60) {
                 countEl.textContent = minutes + '分';
             } else {
@@ -250,7 +250,8 @@
     }
     
     function formatTime(seconds) {
-        if (seconds < 60) return seconds + '秒';
+        if (!seconds || seconds <= 0 || isNaN(seconds)) return '0秒';
+        if (seconds < 60) return Math.floor(seconds) + '秒';
         if (seconds < 3600) return Math.floor(seconds / 60) + '分';
         const hours = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
@@ -265,11 +266,12 @@
         document.getElementById('today-date').textContent = today.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
         
         const todayTime = stats.lastVisitDate === todayStr ? stats.todayLearningTime : 0;
-        const target = getLearningTarget() * 60;
-        const percent = Math.min(Math.round((todayTime / target) * 100), 100);
+        let target = getLearningTarget() * 60;
+        if (!target || target <= 0) target = 300;
+        const percent = target > 0 ? Math.min(Math.round((todayTime / target) * 100), 100) : 0;
         document.getElementById('today-target').textContent = Math.floor(target / 60);
         
-        document.getElementById('today-count').textContent = formatTime(todayTime);
+        document.getElementById('today-count').textContent = todayTime > 0 ? formatTime(todayTime) : '0秒';
         document.getElementById('today-progress').style.width = percent + '%';
         document.getElementById('today-percent').textContent = percent + '%';
         
@@ -338,7 +340,8 @@
         localStorage.setItem('daily_target', newTarget);
         document.getElementById('targetModal').style.display = 'none';
         
-        if (document.getElementById('content-stats').style.display !== 'none') {
+        const statsEl = document.getElementById('content-stats');
+        if (statsEl && statsEl.style.display !== 'none') {
             renderStats();
         }
         
