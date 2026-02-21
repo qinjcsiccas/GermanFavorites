@@ -11,8 +11,11 @@
                 <span class="text-xs text-gray-300" id="today-date"></span>
             </div>
             <div class="flex items-end justify-between">
-                <div>
+                <div class="flex items-baseline">
                     <span class="text-3xl font-bold text-blue-600" id="today-count">0秒</span>
+                    <button id="stop-learning-btn" onclick="manualEndLearning()" style="display: none;" class="ml-3 mb-1 px-3 py-1 text-xs font-bold text-red-500 bg-red-50 border border-red-100 rounded-full hover:bg-red-100 transition-colors shadow-sm animate-pulse cursor-pointer">
+                        ⏹ 结束计时
+                    </button>
                 </div>
                 <div class="text-sm text-gray-400">目标 <span id="today-target" class="font-bold text-blue-500">5</span> 分钟</div>
             </div>
