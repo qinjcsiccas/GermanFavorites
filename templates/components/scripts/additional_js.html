@@ -171,17 +171,22 @@
         }
         
         localStorage.setItem('learning_stats', JSON.stringify(stats));
-        
+                
         learningTimer = setInterval(() => {
             if (stats.currentSession) {
                 const elapsed = Math.floor((Date.now() - stats.currentSession.startTime) / 1000);
-                updateLearningDisplay(elapsed);
+                // 🛠️ 修复：让面板显示的是【今日已学总时间 + 正在进行的这段时间】，而不是从 0 开始跳
+                updateLearningDisplay((stats.todayLearningTime || 0) + elapsed);
             }
         }, 1000);
         
         if (document.getElementById('content-stats') && document.getElementById('content-stats').style.display !== 'none') {
             renderStats();
         }
+        
+        // 🔴 新增：显示结束按钮
+        const stopBtn = document.getElementById('stop-learning-btn');
+        if (stopBtn) stopBtn.style.display = 'inline-block';
     }
     
     function updateLearningDisplay(seconds) {
@@ -234,6 +239,25 @@
         stats.currentSession = null;
         localStorage.setItem('learning_stats', JSON.stringify(stats));
     }
+
+    function manualEndLearning() {
+        const stats = initLearningStats();
+        if (!stats.currentSession) return;
+        
+        const resourceName = stats.currentSession.name;
+        
+        endLearning(); // 调用核心结算逻辑
+        
+        // 重新渲染统计数据并隐藏按钮
+        if (document.getElementById('content-stats') && document.getElementById('content-stats').style.display !== 'none') {
+            renderStats(); 
+        }
+        
+        // 弹窗提示结算成功
+        if (typeof showToast === 'function') {
+            showToast(`已结束学习: ${resourceName}`, '✅');
+        }
+    }
     
     window.addEventListener('beforeunload', function() {
         endLearning();
@@ -258,6 +282,10 @@
     
     function renderStats() {
         const stats = initLearningStats();
+        const stopBtn = document.getElementById('stop-learning-btn');
+        if (stopBtn) {
+            stopBtn.style.display = stats.currentSession ? 'inline-block' : 'none';
+        }
         const today = new Date();
         const todayStr = today.toDateString();
         
