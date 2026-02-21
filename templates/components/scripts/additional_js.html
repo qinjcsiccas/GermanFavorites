@@ -235,17 +235,15 @@
         localStorage.setItem('learning_stats', JSON.stringify(stats));
     }
     
-    document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'hidden') {
-            endLearning();
-        }
-    });
-    
     window.addEventListener('beforeunload', function() {
         endLearning();
     });
     
     function recordResourceVisit(name, url, note) {
+        startLearning(name, url, note);
+    }
+
+    function recordHistory(name, url, note) {
         startLearning(name, url, note);
     }
     
