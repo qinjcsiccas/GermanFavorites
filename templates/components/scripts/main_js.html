@@ -2,6 +2,20 @@
     window.addEventListener('load', () => {
         document.body.classList.add('loaded');
     });
+
+    function toggleCustomType(selectElem, containerId) {
+        const container = document.getElementById(containerId);
+        const input = container.querySelector('input');
+        if (selectElem.value === '__custom__') {
+            container.style.display = 'block';
+            input.required = true;
+            input.focus();
+        } else {
+            container.style.display = 'none';
+            input.required = false;
+            input.value = '';
+        }
+    }
     
     function liveSearch(val) {
         const searchVal = val.toLowerCase().trim();
