@@ -140,19 +140,22 @@ def add():
     url = request.form.get('url', '').strip()
     name = request.form.get('name', '').strip()
 
-    # --- 1. 在这里增加补齐逻辑 ---
     if url and not url.startswith(('http://', 'https://')):
         url = 'https://' + url
-    # ---------------------------
 
-    # --- 2. 然后再进行你原本的校验 ---
     if not is_valid_url(url):
         flash("网址格式有误，请重试 ⚠️")
         return redirect(url_for('index'))
     
+    # --- 新增：处理自定义分类 ---
+    resource_type = request.form.get('type')
+    if resource_type == '__custom__':
+        resource_type = request.form.get('custom_type', '').strip() or '其他'
+        
     sheet = get_user_sheet(session['user'])
-    # 注意：这里存入 sheet 的 url 已经是补齐后的了
-    sheet.append_row([name, url, request.form.get('type'), request.form.get('note').strip(), "FALSE"])
+    # 注意：这里存入的分类改成了 resource_type
+    sheet.append_row([name, url, resource_type, request.form.get('note').strip(), "FALSE"])
+    
     # 清空用户缓存
     cache_key = f"user_data_{session['user']}"
     if cache_key in cache:
@@ -209,10 +212,15 @@ def edit_resource():
     if raw_url and not raw_url.startswith(('http://', 'https://')):
         raw_url = 'https://' + raw_url
     
+    # --- 新增：处理自定义分类 ---
+    resource_type = request.form.get('type')
+    if resource_type == '__custom__':
+        resource_type = request.form.get('custom_type', '').strip() or '其他'
+    
     updated_row = [
         name,
         raw_url,
-        request.form.get('type'),
+        resource_type, # 这里换成了动态的 resource_type
         request.form.get('note')
     ]
     
@@ -291,9 +299,13 @@ def index():
     
     # 2. 如果有缓存且没有搜索关键词，直接使用缓存数据
     if cached_data and not q:
-        starred, cat_data = cached_data
-        print(f"使用缓存数据 for {session['user']}")  # 调试用，可以删除
-        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
+        # 兼容处理：确保从缓存中解包出 dynamic_categories
+        if len(cached_data) == 3:
+            starred, cat_data, dynamic_categories = cached_data
+        else:
+            starred, cat_data = cached_data
+            dynamic_categories = UI_CATEGORIES.copy()
+        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=dynamic_categories)
     
     # 3. 没有缓存或正在搜索，从Google Sheets获取数据
     try:
@@ -305,12 +317,19 @@ def index():
         if not records:
             return render_template('index.html', starred=[], cat_data={}, q=q, user=session['user'], categories=UI_CATEGORIES)
 
-        # 4. 数据处理（原有逻辑保持不变）
+        # 4. 数据处理与分类收集
         all_items = []
+        all_types = set() # 新增：收集表格中出现的所有分类
+        
         for r in records:
             item = {str(k).strip(): (v if v is not None else "") for k, v in r.items()}
             is_star = str(item.get('标星', '')).upper() in ['TRUE', '1', '是', 'YES']
             item['标星'] = is_star
+            
+            # 记录有效的分类
+            cat_val = str(item.get('类型', '')).strip()
+            if cat_val: 
+                all_types.add(cat_val)
             
             if q:
                 if q in str(item.get('名称', '')).lower() or q in str(item.get('备注', '')).lower():
@@ -322,18 +341,25 @@ def index():
         starred = [i for i in all_items if i['标星']]
         starred.sort(key=lambda x: str(x.get('名称', '')).lower())
 
-        # 6. 按分类整理
-        for cat in UI_CATEGORIES:
-            cat_list = [i for i in all_items if i.get('类型') == cat]
+        # --- 新增：动态生成分类列表，强制把“其他”垫底 ---
+        base_cats = ["影音视听", "系统学习", "词典工具", "移动应用"]
+        # custom_cats: 从所有类型中剔除基础分类和"其他"，剩下的就是用户自定义的
+        custom_cats = sorted(list(all_types - set(base_cats) - {"其他"}))
+        # 组装最终呈现的分类顺序
+        dynamic_categories = base_cats + custom_cats + ["其他"]
+
+        # 6. 按动态分类整理
+        for cat in dynamic_categories:
+            cat_list = [i for i in all_items if str(i.get('类型', '')).strip() == cat]
             if cat_list:
                 cat_list.sort(key=lambda x: str(x.get('名称', '')).lower())
                 cat_data[cat] = cat_list
         
         # 7. 只有在没有搜索关键词时才缓存数据
         if not q:
-            set_cached(cache_key, (starred, cat_data))
+            set_cached(cache_key, (starred, cat_data, dynamic_categories))
         
-        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=UI_CATEGORIES)
+        return render_template('index.html', starred=starred, cat_data=cat_data, q=q, user=session['user'], categories=dynamic_categories)
     
     except Exception as e:
         print(f"Server Logic Error: {str(e)}") 
