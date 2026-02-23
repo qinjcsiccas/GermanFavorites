@@ -9,9 +9,13 @@
             <input type="text" name="name" id="edit_name" required class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
             <input type="text" name="url" id="edit_url" placeholder="网址必须以 https:// 或 http:// 开头" required 
                 class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">                
-            <select name="type" id="edit_type" class="w-full border border-gray-100 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-blue-400">
+            <select name="type" id="edit_type" onchange="toggleCustomType(this, 'edit_custom_container')" class="w-full border border-gray-100 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-blue-400">
                 {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
+                <option value="__custom__">✨ 【+ 自定义新分类】</option>
             </select>
+            <div id="edit_custom_container" style="display: none;">
+                <input type="text" name="custom_type" placeholder="请输入新分类名称" class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
             <textarea name="note" id="edit_note" class="w-full border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none" rows="2"></textarea>
             
             <div class="flex flex-col gap-2 pt-2">
